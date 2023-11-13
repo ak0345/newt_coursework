@@ -30,6 +30,11 @@ def home(request):
 
     return render(request, "home.html")
 
+def team_management(request):
+    """Display the application's start/home screen."""
+
+    return render(request, "team_management.html")
+
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""

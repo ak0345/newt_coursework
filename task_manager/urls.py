@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path
 from tasks import views
 from tasks.views import create_team
+from tasks.views import team_management
+
 
 
 urlpatterns = [
@@ -30,4 +32,5 @@ urlpatterns = [
     path("profile/", views.ProfileUpdateView.as_view(), name="profile"),
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("create_team/", create_team, name="create_team"),
+    path("team_management/", team_management, name="team_management"),
 ]

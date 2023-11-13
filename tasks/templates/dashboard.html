@@ -1,10 +1,8 @@
-{% extends 'base_content.html' %}
-{% block content %}
+{% extends 'base_content.html' %} {% block content %}
 <div class="container">
   <div class="row">
     <div class="col-12">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
-      <a href="{% url 'create_team' %}">Create a Team</a>
     </div>
   </div>
 </div>
