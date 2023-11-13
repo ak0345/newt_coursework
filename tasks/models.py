@@ -1,11 +1,11 @@
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
-
     username = models.CharField(
         max_length=30,
         unique=True,
@@ -17,6 +17,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
+    owned_tasks = models.ManyToManyField('Task', blank=True, related_name='owners')
 
 
     class Meta:
@@ -40,3 +41,55 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+class Task(models.Model):
+    task_heading = models.CharField(max_length=60, blank=False)
+    task_description = models.CharField(max_length=160, null=True, blank=True)
+    #team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True
+                                      #validators = []
+                                      #put in validator to make sure team assigned is a listed team
+                                      #)
+    task_owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name='tasks_owned')
+    user_assigned = models.ManyToManyField('User', blank=True
+                                           #validators = [check_users_team]
+                                           )
+    creation_date = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    deadline_date = models.DateTimeField(null=True, blank=True)
+    task_complete = models.BooleanField(default=False)
+
+    # allow one task to have sub-tasks without those sub-tasks necessarily having the original task as a parent.
+    sub_tasks = models.ManyToManyField('self', blank=True, symmetrical=False
+                                       #validators = []
+                                       #put in validator to make sure sub_tasks belong to team and user
+                                       )
+
+    class Meta:
+        """Model options."""
+        ordering = ['task_heading']
+
+    '''
+    will do this when Team model is created
+    this will make sure that users assigned are part of team assigned
+
+    def check_users_team(value):
+        if self.team_assigned and self.user_assigned.count() > 0:
+            if user is in the team assigned:
+                return value
+            else:
+                return ValidationError(f'User is not in {team_assigned}')
+    '''
+
+    """
+    def save(self, *args, **kwargs):
+        if self.team_assigned:
+            # If a team is assigned, clear all users as we can only 
+            # assign user from the team assigned
+            self.user_assigned.clear()
+        super().save(*args, **kwargs)
+    """
+
+    def __str__(self):
+        return self.task_heading
+    
+
