@@ -2,8 +2,12 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Team
+from .models import User
+from .models import Team
 
+
+class TeamSearchForm(forms.Form):
+    search_query = forms.CharField(label='Search Teams', max_length=100)
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""

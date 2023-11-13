@@ -12,6 +12,8 @@ from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
 from django.shortcuts import render, redirect
 from .forms import TeamCreationForm
+from .forms import TeamSearchForm
+from .models import Team
 
 
 @login_required
@@ -166,3 +168,15 @@ def create_team(request):
     else:
         form = TeamCreationForm()
     return render(request, "create_team.html", {"form": form})
+
+def team_search(request):
+    teams = Team.objects.get()
+
+    if 'unique_identifier' in request.GET:
+        unique_identifier = request.GET['unique_identifier']
+        if unique_identifier:
+            teams = teams.filter(unique_identifier__icontains=unique_identifier)
+
+    form = TeamSearchForm()
+    context = {'teams': teams, 'form': form}
+    return render(request, 'create_team.html', context)
