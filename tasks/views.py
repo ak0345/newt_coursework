@@ -30,6 +30,7 @@ def home(request):
 
     return render(request, "home.html")
 
+
 def team_management(request):
     """Display the application's start/home screen."""
 
@@ -168,20 +169,23 @@ def create_team(request):
     if request.method == "POST":
         form = TeamCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("dashboard")  # Create a URL for team_management page to redirect.
+            team = form.save(request.user)
+            return redirect(
+                f"team_management/{team.unique_identifier}"
+            )  # Create a URL for team_management page to redirect.
     else:
         form = TeamCreationForm()
     return render(request, "create_team.html", {"form": form})
 
+
 def team_search(request):
     teams = Team.objects.get()
 
-    if 'unique_identifier' in request.GET:
-        unique_identifier = request.GET['unique_identifier']
+    if "unique_identifier" in request.GET:
+        unique_identifier = request.GET["unique_identifier"]
         if unique_identifier:
             teams = teams.filter(unique_identifier__icontains=unique_identifier)
 
     form = TeamSearchForm()
-    context = {'teams': teams, 'form': form}
-    return render(request, 'create_team.html', context)
+    context = {"teams": teams, "form": form}
+    return render(request, "create_team.html", context)

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
+from datetime import datetime
 
 
 class User(AbstractUser):
@@ -79,6 +80,16 @@ class Task(models.Model):
 class Team(models.Model):
     team_name = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=False)
+    team_owner = models.ForeignKey(
+        "User", on_delete=models.CASCADE, related_name="teams_owned"
+    )
+    users_in_team = models.ManyToManyField(
+        "User",
+        blank=True
+        # validators = [check_users_team] - this may need to be updated / a new one made
+    )
+    creation_date = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now=True)
     unique_identifier = models.CharField(
         max_length=50,
         unique=True,

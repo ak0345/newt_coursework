@@ -20,8 +20,6 @@ from tasks import views
 from tasks.views import create_team
 from tasks.views import team_management
 
-
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.home, name="home"),
