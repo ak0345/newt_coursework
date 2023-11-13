@@ -76,6 +76,21 @@ class Task(models.Model):
     )
 
 
+class Team(models.Model):
+    team_name = models.CharField(max_length=100, blank=False)
+    description = models.TextField(blank=False)
+    unique_identifier = models.CharField(
+        max_length=50,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r"^#\w{3,}$",
+                message="Unqiue identifer must consist of # followed by at least three alphanumericals",
+            )
+        ],
+    )
+
+
 class Meta:
     """Model options."""
 
