@@ -10,15 +10,29 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
-
+from .models import Task
+from django.shortcuts import render, redirect
+from .forms import TaskForm 
 
 @login_required
 def dashboard(request):
+    tasks = Task.objects.all()
+    form = TaskForm()  # Create an instance of the form
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+
+    return render(request, 'dashboard.html', {'tasks': tasks, 'form': form})
+
+@login_required
+def tasks(request):
     """Display the current user's dashboard."""
 
     current_user = request.user
-    return render(request, 'dashboard.html', {'user': current_user})
-
+    return render(request, 'tasks.html', {'tasks': tasks})
 
 @login_prohibited
 def home(request):

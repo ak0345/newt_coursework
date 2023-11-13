@@ -59,10 +59,10 @@ class Task(models.Model):
     task_complete = models.BooleanField(default=False)
 
     # allow one task to have sub-tasks without those sub-tasks necessarily having the original task as a parent.
-    sub_tasks = models.ManyToManyField('self', blank=True, symmetrical=False
+    #sub_tasks = models.ManyToManyField('self', blank=True, symmetrical=False
                                        #validators = []
                                        #put in validator to make sure sub_tasks belong to team and user
-                                       )
+                                     #  )
 
     class Meta:
         """Model options."""
