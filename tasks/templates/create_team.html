@@ -1,0 +1,25 @@
+{% extends 'base_content.html' %} {% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'team_management' %}"
+    >Back to Team Management</a
+  >
+  <div class="row">
+    <div class="col-md-auto mt-4">
+      <h3>Create a Team</h3>
+    </div>
+
+    <div class="mt-4">
+      <p>Here you can create a team and expand your network in 3 easy steps!</p>
+      <p>
+        Please note: the unique identifier is case sensitive, so #newteam,
+        #newTeam, and #NewTeam would create 3 different teams
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit" class="btn btn-dark">Create Team</button>
+    </form>
+    {% endblock %}
+  </div>
+</div>
