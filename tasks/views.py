@@ -171,7 +171,7 @@ def create_team(request):
         if form.is_valid():
             team = form.save(request.user)
             return redirect(
-                f"team_management/{team.unique_identifier}"
+                "team_management"
             )  # Create a URL for team_management page to redirect.
     else:
         form = TeamCreationForm()
