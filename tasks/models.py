@@ -56,7 +56,7 @@ class Task(models.Model):
     # put in validator to make sure team assigned is a listed team
     #)
     task_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="tasks_owned", default='default_owner'
+        "User", on_delete=models.CASCADE, related_name="tasks_owned", default=0
     )
     user_assigned = models.ManyToManyField(
         "User",
@@ -69,12 +69,6 @@ class Task(models.Model):
     task_complete = models.BooleanField(default=False)
 
     # allow one task to have sub-tasks without those sub-tasks necessarily having the original task as a parent.
-<<<<<<< HEAD
-    #sub_tasks = models.ManyToManyField('self', blank=True, symmetrical=False
-                                       #validators = []
-                                       #put in validator to make sure sub_tasks belong to team and user
-                                     #  )
-=======
     sub_tasks = models.ManyToManyField(
         "self",
         blank=True,
@@ -82,7 +76,6 @@ class Task(models.Model):
         # validators = []
         # put in validator to make sure sub_tasks belong to team and user
     )
->>>>>>> task_ali
 
     class Meta:
         """Model options."""
@@ -112,16 +105,12 @@ class Task(models.Model):
 
     def __str__(self):
         return self.task_heading
-<<<<<<< HEAD
-    
-=======
-
 
 class Team(models.Model):
     team_name = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="teams_owned", default='default_owner'
+        "User", on_delete=models.CASCADE, related_name="teams_owned", default=0
     )
     users_in_team = models.ManyToManyField(
         "User",
@@ -143,4 +132,3 @@ class Team(models.Model):
 
 
 
->>>>>>> task_ali

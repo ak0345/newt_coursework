@@ -1,6 +1,11 @@
-<!-- dashboard.html -->
-<body>
-  <h1>Task Dashboard</h1>
+{% extends 'base_content.html' %} {% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>Welcome to your dashboard {{ user.username }}</h1>
+    </div>
+  </div>
+  <h2>Task Dashboard</h2>
 
   <ul>
       {% for task in tasks %}
@@ -21,4 +26,5 @@
       {{ form.as_p }}
       <button type="submit">Create Task</button>
   </form>
-</body>
+</div>
+{% endblock %}

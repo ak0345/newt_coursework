@@ -3,17 +3,13 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User
-<<<<<<< HEAD
-from django import forms
 from .models import Task
-=======
 from .models import Team
 
 
 class TeamSearchForm(forms.Form):
     search_query = forms.CharField(label="Search Teams", max_length=100)
 
->>>>>>> task_ali
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""

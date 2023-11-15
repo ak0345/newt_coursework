@@ -10,17 +10,11 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
-<<<<<<< HEAD
 from .models import Task
-from django.shortcuts import render, redirect
 from .forms import TaskForm 
-=======
-from django.shortcuts import render, redirect
 from .forms import TeamCreationForm
 from .forms import TeamSearchForm
 from .models import Team
-
->>>>>>> task_ali
 
 @login_required
 def dashboard(request):
@@ -40,12 +34,7 @@ def tasks(request):
     """Display the current user's dashboard."""
 
     current_user = request.user
-<<<<<<< HEAD
     return render(request, 'tasks.html', {'tasks': tasks})
-=======
-    return render(request, "dashboard.html", {"user": current_user})
-
->>>>>>> task_ali
 
 @login_prohibited
 def home(request):
