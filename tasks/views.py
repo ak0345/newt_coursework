@@ -10,9 +10,17 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
+<<<<<<< HEAD
 from .models import Task
 from django.shortcuts import render, redirect
 from .forms import TaskForm 
+=======
+from django.shortcuts import render, redirect
+from .forms import TeamCreationForm
+from .forms import TeamSearchForm
+from .models import Team
+
+>>>>>>> task_ali
 
 @login_required
 def dashboard(request):
@@ -32,13 +40,24 @@ def tasks(request):
     """Display the current user's dashboard."""
 
     current_user = request.user
+<<<<<<< HEAD
     return render(request, 'tasks.html', {'tasks': tasks})
+=======
+    return render(request, "dashboard.html", {"user": current_user})
+
+>>>>>>> task_ali
 
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 
-    return render(request, 'home.html')
+    return render(request, "home.html")
+
+
+def team_management(request):
+    """Display the application's start/home screen."""
+
+    return render(request, "team_management.html")
 
 
 class LoginProhibitedMixin:
@@ -71,52 +90,54 @@ class LoginProhibitedMixin:
 class LogInView(LoginProhibitedMixin, View):
     """Display login screen and handle user login."""
 
-    http_method_names = ['get', 'post']
+    http_method_names = ["get", "post"]
     redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
     def get(self, request):
         """Display log in template."""
 
-        self.next = request.GET.get('next') or ''
+        self.next = request.GET.get("next") or ""
         return self.render()
 
     def post(self, request):
         """Handle log in attempt."""
 
         form = LogInForm(request.POST)
-        self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
+        self.next = request.POST.get("next") or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
         if user is not None:
             login(request, user)
             return redirect(self.next)
-        messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
+        messages.add_message(
+            request, messages.ERROR, "The credentials provided were invalid!"
+        )
         return self.render()
 
     def render(self):
         """Render log in template with blank log in form."""
 
         form = LogInForm()
-        return render(self.request, 'log_in.html', {'form': form, 'next': self.next})
+        return render(self.request, "log_in.html", {"form": form, "next": self.next})
 
 
 def log_out(request):
     """Log out the current user"""
 
     logout(request)
-    return redirect('home')
+    return redirect("home")
 
 
 class PasswordView(LoginRequiredMixin, FormView):
     """Display password change screen and handle password change requests."""
 
-    template_name = 'password.html'
+    template_name = "password.html"
     form_class = PasswordForm
 
     def get_form_kwargs(self, **kwargs):
         """Pass the current user to the password change form."""
 
         kwargs = super().get_form_kwargs(**kwargs)
-        kwargs.update({'user': self.request.user})
+        kwargs.update({"user": self.request.user})
         return kwargs
 
     def form_valid(self, form):
@@ -130,7 +151,7 @@ class PasswordView(LoginRequiredMixin, FormView):
         """Redirect the user after successful password change."""
 
         messages.add_message(self.request, messages.SUCCESS, "Password updated!")
-        return reverse('dashboard')
+        return reverse("dashboard")
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -165,3 +186,29 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+
+def create_team(request):
+    if request.method == "POST":
+        form = TeamCreationForm(request.POST)
+        if form.is_valid():
+            team = form.save(request.user)
+            return redirect(
+                f"team_management/{team.unique_identifier}"
+            )  # Create a URL for team_management page to redirect.
+    else:
+        form = TeamCreationForm()
+    return render(request, "create_team.html", {"form": form})
+
+
+def team_search(request):
+    teams = Team.objects.get()
+
+    if "unique_identifier" in request.GET:
+        unique_identifier = request.GET["unique_identifier"]
+        if unique_identifier:
+            teams = teams.filter(unique_identifier__icontains=unique_identifier)
+
+    form = TeamSearchForm()
+    context = {"teams": teams, "form": form}
+    return render(request, "create_team.html", context)
