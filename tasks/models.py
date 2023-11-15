@@ -124,7 +124,7 @@ class Team(models.Model):
         validators=[
             RegexValidator(
                 regex=r"^#\w{3,}$",
-                message="Unique identifier must consist of # followed by at least three alphanumericals",
+                message="Unique Identifier must consist of # followed by at least three alphanumericals",
             )
         ],
     )
