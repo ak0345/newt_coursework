@@ -22,7 +22,8 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
-    owned_tasks = models.ManyToManyField("Task", blank=True, related_name="owners")
+    owned_tasks = models.ManyToManyField("Task", blank=True, related_name="task_owners")
+    owned_teams = models.ManyToManyField("Team", blank=True, related_name="team_owners")
 
     class Meta:
         """Model options."""
@@ -50,12 +51,12 @@ class User(AbstractUser):
 class Task(models.Model):
     task_heading = models.CharField(max_length=60, blank=False)
     task_description = models.CharField(max_length=160, null=True, blank=True)
-    # team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True
-    # validators = []
+    #team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_assigned'
+    #validators = []
     # put in validator to make sure team assigned is a listed team
-    # )
+    #)
     task_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="tasks_owned"
+        "User", on_delete=models.CASCADE, related_name="tasks_owned", default='default_owner'
     )
     user_assigned = models.ManyToManyField(
         "User",
@@ -76,12 +77,41 @@ class Task(models.Model):
         # put in validator to make sure sub_tasks belong to team and user
     )
 
+    class Meta:
+        """Model options."""
+
+        ordering = ["task_heading"]
+
+        """
+        will do this when Team model is created
+        this will make sure that users assigned are part of team assigned
+
+        def check_users_team(value):
+            if self.team_assigned and self.user_assigned.count() > 0:
+                if user is in the team assigned:
+                    return value
+                else:
+                    return ValidationError(f'User is not in {team_assigned}')
+        """
+
+        """
+        def save(self, *args, **kwargs):
+            if self.team_assigned:
+                # If a team is assigned, clear all users as we can only 
+                # assign user from the team assigned
+                self.user_assigned.clear()
+            super().save(*args, **kwargs)
+        """
+
+    def __str__(self):
+        return self.task_heading
+
 
 class Team(models.Model):
     team_name = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="teams_owned"
+        "User", on_delete=models.CASCADE, related_name="teams_owned", default='default_owner'
     )
     users_in_team = models.ManyToManyField(
         "User",
@@ -102,31 +132,4 @@ class Team(models.Model):
     )
 
 
-class Meta:
-    """Model options."""
 
-    ordering = ["task_heading"]
-
-    """
-    will do this when Team model is created
-    this will make sure that users assigned are part of team assigned
-
-    def check_users_team(value):
-        if self.team_assigned and self.user_assigned.count() > 0:
-            if user is in the team assigned:
-                return value
-            else:
-                return ValidationError(f'User is not in {team_assigned}')
-    """
-
-    """
-    def save(self, *args, **kwargs):
-        if self.team_assigned:
-            # If a team is assigned, clear all users as we can only 
-            # assign user from the team assigned
-            self.user_assigned.clear()
-        super().save(*args, **kwargs)
-    """
-
-    def __str__(self):
-        return self.task_heading
