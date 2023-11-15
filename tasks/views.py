@@ -29,13 +29,6 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', {'tasks': tasks, 'form': form})
 
-@login_required
-def tasks(request):
-    """Display the current user's dashboard."""
-
-    current_user = request.user
-    return render(request, 'tasks.html', {'tasks': tasks})
-
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
