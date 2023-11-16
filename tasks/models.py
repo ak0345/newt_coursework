@@ -111,7 +111,7 @@ class Task(models.Model):
 
 
 class Team(models.Model):
-    team_name = models.CharField(max_length=100, blank=False)
+    team_name = models.CharField(max_length=100, unique=True, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
         "User",
@@ -124,15 +124,18 @@ class Team(models.Model):
         blank=True
         # validators = [check_users_team] - this may need to be updated / a new one made
     )
-    creation_date = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now=True)
     unique_identifier = models.CharField(
         max_length=50,
         unique=True,
         validators=[
             RegexValidator(
                 regex=r"^#\w{3,}$",
-                message="Unqiue identifer must consist of # followed by at least three alphanumericals",
+                message="Unique Identifier must consist of # followed by at least three alphanumericals",
             )
         ],
     )
+    team_owner = models.ForeignKey(
+         "User", on_delete=models.CASCADE, related_name="teams_owned", default="0"
+     )
+     creation_date = models.DateTimeField(auto_now=True)
+     last_modified = models.DateTimeField(auto_now=True)
