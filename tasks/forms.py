@@ -128,16 +128,17 @@ class TeamCreationForm(forms.ModelForm):
         model = Team
         fields = ["team_name", "unique_identifier", "description"]
 
-    def save(self, user, commit=True):
+    def save(self, commit=True):
         """Create a new team."""
+        if not self.is_valid():
+            raise ValueError("Cannot save the form. Please ensure the form is valid.")
+
         new_team = Team(
             team_name=self.cleaned_data["team_name"],
             unique_identifier=self.cleaned_data["unique_identifier"],
             description=self.cleaned_data["description"],
-            team_owner=user,
-            # Create a test for the above line to make sure we have access to the current user, and in a view, this is typically available in the request object.
         )
-
-        new_team.save()
+        if commit:
+            new_team.save()
 
         return new_team

@@ -34,5 +34,23 @@
       "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
       "is_active": true
     }
+  },
+  {
+    "model": "tasks.team",
+    "pk": 1,
+    "fields": {
+      "team_name": "Newt",
+      "description": "This is a sample team.",
+      "unique_identifier": "#Newt"
+    }
+  },
+  {
+    "model": "tasks.team",
+    "pk": 2,
+    "fields": {
+      "team_name": "Team_Newt",
+      "description": "This is a sample team.",
+      "unique_identifier": "#Team_Newt"
+    }
   }
 ]
