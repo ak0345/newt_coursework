@@ -1,0 +1,36 @@
+{% extends 'base_content.html' %} {% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'team_management' %}"
+    >Back to Team Management</a
+  >
+  <div class="row">
+    <div class="col">
+      <div class="row">
+        <div class="col mt-4">
+          <h3>
+            Selected Team: <span class="text-muted">#</span>{{ team.team_name }}
+          </h3>
+        </div>
+        <div class="col-md-auto"></div>
+        <div class="col-sm-auto mt-4">
+          <a href="{% url 'create_team' %}"
+            ><button type="button" class="btn btn-danger">
+              Leave / Delete
+            </button></a
+          >
+        </div>
+      </div>
+      <div class="row mt-4">
+        <h3>Team members:</h3>
+        <li>Team Member 1</li>
+        <li>Team Member 2</li>
+        <li>Team Member 3</li>
+      </div>
+      <div class="row mt-4">
+        <h3>Invite User:</h3>
+        <li>Team Member 1</li>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
