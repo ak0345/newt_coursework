@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Task
+from .models import User, Task, Team
 
 # Register your models here.
 
@@ -9,8 +9,14 @@ class UserAdmin(admin.ModelAdmin):
         'username', 'first_name', 'last_name', 'email', 'is_active', 'is_staff',
     ]
 
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = [
+        'unique_identifier', 'team_name','description', 'team_owner','creation_date','last_modified',
+    ]
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = [
-        'id','task_heading','creation_date', 'last_modified','task_owner','task_complete'
+        'id','task_heading','creation_date', 'last_modified','task_owner','task_complete',
     ]

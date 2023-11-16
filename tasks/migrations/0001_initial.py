@@ -99,6 +99,45 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name="Task",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("task_heading", models.CharField(max_length=50)),
+                (
+                    "task_description",
+                    models.CharField(blank=True, max_length=160, null=True),
+                ),
+                ("creation_date", models.DateTimeField(auto_now_add=True)),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("deadline_date", models.DateTimeField(blank=True, null=True)),
+                ("task_complete", models.BooleanField(default=False)),
+                (
+                    "sub_tasks",
+                    models.ManyToManyField(
+                        blank=True, related_name="subtasks", to="tasks.task"
+                    ),
+                ),
+                (
+                    "task_owner",
+                    models.ForeignKey(
+                        default=0,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tasks_owned",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+            ],
+            options={"ordering": ["task_heading"],},
+        ),
+        migrations.CreateModel(
             name="Team",
             fields=[
                 (
@@ -128,9 +167,15 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "owned_tasks",
+                    models.ManyToManyField(
+                        blank=True, related_name="team_tasks_owned", to="tasks.task"
+                    ),
+                ),
+                (
                     "team_owner",
                     models.ForeignKey(
-                        default="default_owner",
+                        default=0,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="teams_owned",
                         to=settings.AUTH_USER_MODEL,
@@ -141,46 +186,6 @@ class Migration(migrations.Migration):
                     models.ManyToManyField(blank=True, to=settings.AUTH_USER_MODEL),
                 ),
             ],
-        ),
-        migrations.CreateModel(
-            name="Task",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("task_heading", models.CharField(max_length=60)),
-                (
-                    "task_description",
-                    models.CharField(blank=True, max_length=160, null=True),
-                ),
-                ("creation_date", models.DateTimeField(auto_now_add=True)),
-                ("last_modified", models.DateTimeField(auto_now=True)),
-                ("deadline_date", models.DateTimeField(blank=True, null=True)),
-                ("task_complete", models.BooleanField(default=False)),
-                ("sub_tasks", models.ManyToManyField(blank=True, to="tasks.task")),
-                (
-                    "task_owner",
-                    models.ForeignKey(
-                        default="default_owner",
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="tasks_owned",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "user_assigned",
-                    models.ManyToManyField(blank=True, to=settings.AUTH_USER_MODEL),
-                ),
-            ],
-            options={
-                "ordering": ["task_heading"],
-            },
         ),
         migrations.AddField(
             model_name="user",

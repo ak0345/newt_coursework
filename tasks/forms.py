@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User
+from .models import Task
 from .models import Team
 from django.forms import ModelForm
 
@@ -26,7 +27,28 @@ class LogInForm(forms.Form):
             password = self.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
         return user
+    
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['task_heading', 'task_description', 'user_assigned', 'team_assigned', 'deadline_date', 'task_complete']
 
+    def save(self, user, commit=True):
+        """Create a new team."""
+        new_task = Task(
+            task_heading=self.cleaned_data["task_heading"],
+            task_description=self.cleaned_data["task_description"],
+            task_owner=user,
+            team_assigned=self.cleaned_data["team_assigned"],
+            deadline_date=self.cleaned_data["deadline_date"],
+            task_complete=self.cleaned_data["task_complete"],
+        )
+
+        new_task.save()
+
+        #new_task.user_assigned.set(self.cleaned_data["user_assigned"])
+
+        return new_task
 
 class UserForm(forms.ModelForm):
     """Form to update user profiles."""

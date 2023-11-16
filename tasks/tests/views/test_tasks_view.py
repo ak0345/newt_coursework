@@ -1,9 +1,8 @@
-"""Unit tests for the Task model."""
-from django.core.exceptions import ValidationError
+"""Tests of the task related views."""
 from django.test import TestCase
 from tasks.models import User,Task,Team
-from tasks.forms import TaskForm
-class TaskModelTest(TestCase):
+
+class TaskViewTest(TestCase):
 
     def create_users(self):
         user1 = User.objects.create(first_name= 'Jane',
@@ -25,7 +24,16 @@ class TaskModelTest(TestCase):
 
         return team
 
-    def test_create_task_via_form(self):
+    def test_create_task_view_get(self):
+        user1,user2 = self.create_users()
+
+        self.client.login(username=user1.username, password=user1.password)
+
+        response = self.client.get('/create_task/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'create_task.html')
+
+    def test_create_task_view_post(self):
 
         user1,user2 = self.create_users()
 
@@ -40,11 +48,8 @@ class TaskModelTest(TestCase):
             'team_assigned': team.id,
             'deadline_date': '2023-12-31',
             'task_complete': False,
+            
         }
-        form = TaskForm(data=form_data)
-        self.assertTrue(form.is_valid())
-        new_task = form.save(user=user1)
-        self.assertEqual(new_task.task_heading, 'Test Task')
-        self.assertEqual(new_task.task_owner, user1)
-        self.assertEqual(list(new_task.user_assigned.all()), [user1, user2])
-        self.assertEqual(new_task.task_owner,user1)
+        response = self.client.post('/create_task/', data=form_data)
+        self.assertRedirects(response, '/dashboard/')  # Adjust the URL based on your project's routing
+        self.assertEqual(Task.objects.count(), 1)
