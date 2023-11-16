@@ -4,14 +4,16 @@
   <div class="row-cols-auto">
     <div class="row mt-4">
       <div class="col">
-        <form>
+        <form method="POST" action="{% url 'lookup-team' %}">
+          {% csrf_token %}
           <div class="row">
             <div class="col mr-4">
               <input
                 type="text"
                 class="form-control"
                 id="input_team_name"
-                placeholder="#team"
+                placeholder="Search #team"
+                name="teamsearched"
               />
             </div>
             <div class="col-sm-auto mr-4">

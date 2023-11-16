@@ -29,6 +29,19 @@ def dashboard(request):
     return render(request, "dashboard.html", {"user": current_user})
 
 
+def lookup_team(request):
+    if request.method == "POST":
+        teamsearched = request.POST["teamsearched"]
+        teamsfound = Team.objects.filter(unique_identifier__contains=teamsearched)
+        return render(
+            request,
+            "team_search.html",
+            {"teamsearched": teamsearched, "teamsfound": teamsfound},
+        )
+    else:
+        return render(request, "team_search.html", {})
+
+
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""

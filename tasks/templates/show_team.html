@@ -8,8 +8,9 @@
       <div class="row">
         <div class="col mt-4">
           <h3>
-            Selected Team: <span class="text-muted">#</span>{{ team.team_name }}
+            <span class="text-muted">#</span>{{ team.team_name }}
           </h3>
+          <cite class=>"{{team.description}}"</cite>
         </div>
         <div class="col-md-auto"></div>
         <div class="col-sm-auto mt-4">
@@ -22,13 +23,33 @@
       </div>
       <div class="row mt-4">
         <h3>Team members:</h3>
-        <li>Team Member 1</li>
-        <li>Team Member 2</li>
-        <li>Team Member 3</li>
+        <li>{{team.users_in_team}}</li>
       </div>
       <div class="row mt-4">
         <h3>Invite User:</h3>
-        <li>Team Member 1</li>
+        <div class="row-cols-auto mt-4">
+          <div class="col">
+            <form method="POST" action="{% url 'lookup-team' %}">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col mr-4">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="input_team_name"
+                    placeholder="Search @username"
+                    name="teamsearched"
+                  />
+                </div>
+                <div class="col-sm-auto mr-4">
+                  <button type="submit" class="btn btn-outline-dark mb-2">
+                    Invite User
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
