@@ -135,7 +135,7 @@ class Team(models.Model):
         ],
     )
     team_owner = models.ForeignKey(
-         "User", on_delete=models.CASCADE, related_name="teams_owned", default="0"
-     )
-     creation_date = models.DateTimeField(auto_now=True)
-     last_modified = models.DateTimeField(auto_now=True)
+        "User", on_delete=models.CASCADE, related_name="teams_owned", default="0"
+    )
+    creation_date = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now=True)
