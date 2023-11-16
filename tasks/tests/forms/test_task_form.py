@@ -12,7 +12,7 @@ class TaskFormTest(TestCase):
         form_data = {
             'task_heading': 'Test Task',
             'task_description': 'This is a test task.',
-            'user_assigned': [self.user.id],
+            #'user_assigned': [self.user.id],
             'team_assigned': 1,
             'deadline_date': '2023-12-31',
             'task_complete': False,
@@ -24,7 +24,7 @@ class TaskFormTest(TestCase):
         # Test with invalid data, for example, missing task_heading
         form_data = {
             'task_description': 'This is a test task.',
-            'user_assigned': [self.user.id],
+            #'user_assigned': [self.user.id],
             'team_assigned': 1,
             'deadline_date': '2023-12-31',
             'task_complete': False,

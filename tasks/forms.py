@@ -45,7 +45,7 @@ class TaskForm(forms.ModelForm):
 
         new_task.save()
 
-        new_task.user_assigned.set(self.cleaned_data["user_assigned"])
+        #new_task.user_assigned.set(self.cleaned_data["user_assigned"])
 
         return new_task
 

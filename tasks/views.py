@@ -158,7 +158,7 @@ class SignUpView(LoginProhibitedMixin, FormView):
     
 @login_required
 def dashboard(request):
-    tasks = Task.objects.all()
+    tasks = Task.objects.filter(task_owner=request.user)
 
     return render(request, 'dashboard.html', {'tasks': tasks})
 
