@@ -21,6 +21,7 @@ from tasks.views import create_team
 from tasks.views import team_management
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     path("", views.home, name="home"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("log_in/", views.LogInView.as_view(), name="log_in"),
@@ -30,4 +31,6 @@ urlpatterns = [
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("create_team/", create_team, name="create_team"),
     path("team_management/", team_management, name="team_management"),
+    path("create_task/", views.create_task, name="create_task"),
 ]
+

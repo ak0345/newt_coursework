@@ -49,19 +49,17 @@ class User(AbstractUser):
 
 
 class Task(models.Model):
-    task_heading = models.CharField(max_length=60, blank=False)
+    task_heading = models.CharField(max_length=50, blank=False)
     task_description = models.CharField(max_length=160, null=True, blank=True)
-    #team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_assigned'
-    #validators = []
-    # put in validator to make sure team assigned is a listed team
-    #)
+    team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_assigned'
+    )
     task_owner = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="tasks_owned", default=0
     )
     user_assigned = models.ManyToManyField(
         "User",
-        blank=True
-        # validators = [check_users_team]
+        blank=True,
+        related_name = "assigned_users",
     )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -72,36 +70,14 @@ class Task(models.Model):
     sub_tasks = models.ManyToManyField(
         "self",
         blank=True,
-        symmetrical=False
-        # validators = []
-        # put in validator to make sure sub_tasks belong to team and user
+        symmetrical=False,
+        related_name="subtasks"
     )
 
     class Meta:
         """Model options."""
 
         ordering = ["task_heading"]
-
-        """
-        will do this when Team model is created
-        this will make sure that users assigned are part of team assigned
-
-        def check_users_team(value):
-            if self.team_assigned and self.user_assigned.count() > 0:
-                if user is in the team assigned:
-                    return value
-                else:
-                    return ValidationError(f'User is not in {team_assigned}')
-        """
-
-        """
-        def save(self, *args, **kwargs):
-            if self.team_assigned:
-                # If a team is assigned, clear all users as we can only 
-                # assign user from the team assigned
-                self.user_assigned.clear()
-            super().save(*args, **kwargs)
-        """
 
     def __str__(self):
         return self.task_heading
@@ -117,6 +93,7 @@ class Team(models.Model):
         blank=True
         # validators = [check_users_team] - this may need to be updated / a new one made
     )
+    owned_tasks = models.ManyToManyField("Task", blank=True, related_name="team_tasks_owned")
     creation_date = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now=True)
     unique_identifier = models.CharField(

@@ -16,19 +16,6 @@ from .forms import TeamCreationForm
 from .forms import TeamSearchForm
 from .models import Team
 
-@login_required
-def dashboard(request):
-    tasks = Task.objects.all()
-    form = TaskForm()  # Create an instance of the form
-
-    if request.method == 'POST':
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')
-
-    return render(request, 'dashboard.html', {'tasks': tasks, 'form': form})
-
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
@@ -168,6 +155,24 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+    
+@login_required
+def dashboard(request):
+    tasks = Task.objects.all()
+
+    return render(request, 'dashboard.html', {'tasks': tasks})
+
+def create_task(request):
+    form = TaskForm()  # Create an instance of the form
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save(user=request.user)
+            return redirect('dashboard')
+
+    return render(request, 'create_task.html', {'form': form})
+
 
 
 def create_team(request):
