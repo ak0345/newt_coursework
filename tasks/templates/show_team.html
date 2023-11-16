@@ -23,7 +23,18 @@
       </div>
       <div class="row mt-4">
         <h3>Team members:</h3>
-        <li>{{team.users_in_team}}</li>
+        
+        <ul class="list-group list-group-flush">
+          {% for user in team.users_in_team.all %}
+          <li class="list-group-item">
+              <span class="text-muted">{{ user.username }}</span
+              >{{" "}}
+              {% if user.is_authenticated %}
+              <span class="text-muted">(you)</span>
+              {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
       </div>
       <div class="row mt-4">
         <h3>Invite User:</h3>

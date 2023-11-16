@@ -138,7 +138,8 @@ class TeamCreationForm(forms.ModelForm):
             team_owner=user,
             # Create a test for the above line to make sure we have access to the current user, and in a view, this is typically available in the request object.
         )
-
         new_team.save()
+        new_team.users_in_team.set([user.id])
+        print(new_team.users_in_team)
 
         return new_team
