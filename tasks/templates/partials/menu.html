@@ -1,9 +1,33 @@
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+  <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'team_management' %}">Teams</a>
+      <a class="nav-link" href="{% url 'team_management' %}"
+        >Teams&nbsp;&nbsp;&nbsp;</a
+      >
+    </li>
+    <li class="nav-item" style="width: 50vw">
+      <form
+        class="container-fluid"
+        method="POST"
+        action="{% url 'lookup-everything' %}"
+      >
+        {% csrf_token %}
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            id="input_everything_name"
+            placeholder="Search for a #team, task, or @username here"
+            aria-label="Search Everything"
+            aria-describedby="basic-addon1"
+            name="everythingsearched"
+          />
+          <button class="input-group-text" id="basic-addon1">Search</button>
+        </div>
+      </form>
     </li>
   </ul>
+
   <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
     <li class="nav-item dropdown">
       <a

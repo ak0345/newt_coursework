@@ -34,4 +34,5 @@ urlpatterns = [
     path("team_management/", team_search, name="team_management"),
     path("team/<int:team_id>", views.show_team, name="show_team"),
     path("team_search/", views.lookup_team, name="lookup-team"),
+    path("everything_search/", views.lookup_everything, name="lookup-everything"),
 ]

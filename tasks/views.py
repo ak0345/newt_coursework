@@ -14,7 +14,7 @@ from tasks.helpers import login_prohibited
 from django.shortcuts import render, redirect
 from .forms import TeamCreationForm
 from .forms import TeamSearchForm
-from .models import Team
+from .models import Team, User
 from django.http import HttpResponse
 from django.template import loader
 from django.urls import reverse
@@ -27,6 +27,25 @@ def dashboard(request):
 
     current_user = request.user
     return render(request, "dashboard.html", {"user": current_user})
+
+
+
+def lookup_everything(request):
+    if request.method == "POST":
+        everythingsearched = request.POST["everythingsearched"]
+        teamsfound = Team.objects.filter(unique_identifier__contains=everythingsearched)
+        usersfound = User.objects.filter(username__contains=everythingsearched)
+        return render(
+            request,
+            "everything_search.html",
+            {
+                "everythingsearched": everythingsearched,
+                "teamsfound": teamsfound,
+                "usersfound": usersfound,
+            },
+        )
+    else:
+        return render(request, "everything_search.html", {})
 
 
 def lookup_team(request):
