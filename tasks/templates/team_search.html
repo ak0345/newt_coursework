@@ -1,0 +1,32 @@
+{% extends 'base_content.html' %} {% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'team_management' %}"
+    >Back to Team Management</a
+  >
+  <div class="row">
+    <div class="col">
+      <div class="row mt-4">
+        <h3 class="mb-4">Search results:</h3>
+        {% if teamsearched %} {% for team in teamsfound %}
+        <li class="list-group-item mb-4">
+          <a
+            class="text-dark text-decoration-none"
+            href="{% url 'show_team' team.id %}"
+            ><span class="text-muted">#</span
+            ><span class="text-darktext-decoration-underline"
+              >{{ team.team_name }}</span
+            >{{" "}}<span class="text-muted"
+              >created by {{ team.team_owner }}</span
+            ></a
+          >
+        </li>
+        {% endfor %} {% else %}
+        <li class="list-group-item">
+          <span class="text-muted">No teams found.</span>
+        </li>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
