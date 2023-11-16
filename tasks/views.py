@@ -12,7 +12,7 @@ from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
 from .models import Task
-from .forms import TaskForm 
+from .forms import TaskForm
 from .forms import TeamCreationForm
 from .forms import TeamSearchForm
 from .models import Team, User
@@ -20,6 +20,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.urls import reverse
 from django.forms.models import model_to_dict
+
 
 def lookup_everything(request):
     if request.method == "POST":
@@ -50,6 +51,7 @@ def lookup_team(request):
         )
     else:
         return render(request, "team_search.html", {})
+
 
 @login_prohibited
 def home(request):
@@ -197,24 +199,25 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
-    
+
+
 @login_required
 def dashboard(request):
     tasks = Task.objects.filter(task_owner=request.user)
 
-    return render(request, 'dashboard.html', {'tasks': tasks})
+    return render(request, "dashboard.html", {"tasks": tasks})
+
 
 def create_task(request):
     form = TaskForm()  # Create an instance of the form
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = TaskForm(request.POST)
         if form.is_valid():
             form.save(user=request.user)
-            return redirect('dashboard')
+            return redirect("dashboard")
 
-    return render(request, 'create_task.html', {'form': form})
-
+    return render(request, "create_task.html", {"form": form})
 
 
 def create_team(request):

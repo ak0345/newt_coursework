@@ -51,7 +51,12 @@ class User(AbstractUser):
 class Task(models.Model):
     task_heading = models.CharField(max_length=50, blank=False)
     task_description = models.CharField(max_length=160, null=True, blank=True)
-    team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_assigned'
+    team_assigned = models.ForeignKey(
+        "Team",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="team_assigned",
     )
     task_owner = models.ForeignKey(
         "User", on_delete=models.CASCADE, related_name="tasks_owned", default=0
@@ -59,7 +64,7 @@ class Task(models.Model):
     user_assigned = models.ManyToManyField(
         "User",
         blank=True,
-        related_name = "assigned_users",
+        related_name="assigned_users",
     )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -68,10 +73,7 @@ class Task(models.Model):
 
     # allow one task to have sub-tasks without those sub-tasks necessarily having the original task as a parent.
     sub_tasks = models.ManyToManyField(
-        "self",
-        blank=True,
-        symmetrical=False,
-        related_name="subtasks"
+        "self", blank=True, symmetrical=False, related_name="subtasks"
     )
 
     class Meta:
@@ -82,29 +84,30 @@ class Task(models.Model):
     def __str__(self):
         return self.task_heading
 
+
 class Team(models.Model):
-    team_name = models.CharField(max_length=100, unique=True, blank=False)
+    team_name = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="teams_owned", default=0
+        "User",
+        on_delete=models.CASCADE,
+        related_name="teams_owned",
+        default="default_owner",
     )
     users_in_team = models.ManyToManyField(
         "User",
         blank=True
         # validators = [check_users_team] - this may need to be updated / a new one made
     )
+    creation_date = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now=True)
     unique_identifier = models.CharField(
         max_length=50,
         unique=True,
         validators=[
             RegexValidator(
                 regex=r"^#\w{3,}$",
-                message="Unique Identifier must consist of # followed by at least three alphanumericals",
+                message="Unqiue identifer must consist of # followed by at least three alphanumericals",
             )
         ],
     )
-    team_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="teams_owned", default="0"
-    )
-    creation_date = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now=True)
