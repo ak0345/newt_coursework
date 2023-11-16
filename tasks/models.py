@@ -51,12 +51,15 @@ class User(AbstractUser):
 class Task(models.Model):
     task_heading = models.CharField(max_length=60, blank=False)
     task_description = models.CharField(max_length=160, null=True, blank=True)
-    #team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_assigned'
-    #validators = []
+    # team_assigned = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_assigned'
+    # validators = []
     # put in validator to make sure team assigned is a listed team
-    #)
+    # )
     task_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="tasks_owned", default='default_owner'
+        "User",
+        on_delete=models.CASCADE,
+        related_name="tasks_owned",
+        default="default_owner",
     )
     user_assigned = models.ManyToManyField(
         "User",
@@ -111,7 +114,10 @@ class Team(models.Model):
     team_name = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="teams_owned", default='default_owner'
+        "User",
+        on_delete=models.CASCADE,
+        related_name="teams_owned",
+        default="default_owner",
     )
     users_in_team = models.ManyToManyField(
         "User",
@@ -130,6 +136,3 @@ class Team(models.Model):
             )
         ],
     )
-
-
-
