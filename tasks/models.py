@@ -113,6 +113,12 @@ class Task(models.Model):
 class Team(models.Model):
     team_name = models.CharField(max_length=100, unique=True, blank=False)
     description = models.TextField(blank=False)
+    team_owner = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        related_name="teams_owned",
+        default="default_owner",
+    )
     users_in_team = models.ManyToManyField(
         "User",
         blank=True
@@ -128,8 +134,8 @@ class Team(models.Model):
             )
         ],
     )
-    # team_owner = models.ForeignKey(
-    #     "User", on_delete=models.CASCADE, related_name="teams_owned", default="0"
-    # )
-    # creation_date = models.DateTimeField(auto_now=True)
-    # last_modified = models.DateTimeField(auto_now=True)
+    team_owner = models.ForeignKey(
+         "User", on_delete=models.CASCADE, related_name="teams_owned", default="0"
+     )
+     creation_date = models.DateTimeField(auto_now=True)
+     last_modified = models.DateTimeField(auto_now=True)

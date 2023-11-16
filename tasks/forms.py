@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User
 from .models import Team
+from django.forms import ModelForm
 
 
 class TeamSearchForm(forms.Form):
@@ -138,7 +139,9 @@ class TeamCreationForm(forms.ModelForm):
             unique_identifier=self.cleaned_data["unique_identifier"],
             description=self.cleaned_data["description"],
         )
-        if commit:
-            new_team.save()
+        new_team.save()
+        new_team.users_in_team.set([user.id])
+      
+        new_team.save()
 
         return new_team

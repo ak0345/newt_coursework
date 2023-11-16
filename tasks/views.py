@@ -4,8 +4,9 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, HttpResponseRedirect, get_object_or_404
 from django.views import View
+from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
@@ -13,7 +14,11 @@ from tasks.helpers import login_prohibited
 from django.shortcuts import render, redirect
 from .forms import TeamCreationForm
 from .forms import TeamSearchForm
-from .models import Team
+from .models import Team, User
+from django.http import HttpResponse
+from django.template import loader
+from django.urls import reverse
+from django.forms.models import model_to_dict
 
 
 @login_required
@@ -24,6 +29,38 @@ def dashboard(request):
     return render(request, "dashboard.html", {"user": current_user})
 
 
+
+def lookup_everything(request):
+    if request.method == "POST":
+        everythingsearched = request.POST["everythingsearched"]
+        teamsfound = Team.objects.filter(unique_identifier__contains=everythingsearched)
+        usersfound = User.objects.filter(username__contains=everythingsearched)
+        return render(
+            request,
+            "everything_search.html",
+            {
+                "everythingsearched": everythingsearched,
+                "teamsfound": teamsfound,
+                "usersfound": usersfound,
+            },
+        )
+    else:
+        return render(request, "everything_search.html", {})
+
+
+def lookup_team(request):
+    if request.method == "POST":
+        teamsearched = request.POST["teamsearched"]
+        teamsfound = Team.objects.filter(unique_identifier__contains=teamsearched)
+        return render(
+            request,
+            "team_search.html",
+            {"teamsearched": teamsearched, "teamsfound": teamsfound},
+        )
+    else:
+        return render(request, "team_search.html", {})
+
+
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
@@ -31,10 +68,17 @@ def home(request):
     return render(request, "home.html")
 
 
-def team_management(request):
-    """Display the application's start/home screen."""
-
-    return render(request, "team_management.html")
+@login_required
+def show_team(request, team_id):
+    try:
+        team = Team.objects.get(id=team_id)
+        # posts = Post.objects.filter(author=user)
+        # following = request.user.is_following(user)
+        # followable = (request.user != user)
+    except ObjectDoesNotExist:
+        return redirect("team_management")
+    else:
+        return render(request, "show_team.html", {"team": team})
 
 
 class LoginProhibitedMixin:
@@ -166,6 +210,8 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
 
 def create_team(request):
+    myteams = Team.objects.all().values()
+    print(myteams)
     if request.method == "POST":
         form = TeamCreationForm(request.POST)
         if form.is_valid():
@@ -179,13 +225,5 @@ def create_team(request):
 
 
 def team_search(request):
-    teams = Team.objects.get()
-
-    if "unique_identifier" in request.GET:
-        unique_identifier = request.GET["unique_identifier"]
-        if unique_identifier:
-            teams = teams.filter(unique_identifier__icontains=unique_identifier)
-
-    form = TeamSearchForm()
-    context = {"teams": teams, "form": form}
-    return render(request, "create_team.html", context)
+    myteams = Team.objects.filter(team_owner_id=request.user.id)
+    return render(request, "team_management.html", {"myteams": myteams})
