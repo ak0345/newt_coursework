@@ -1,0 +1,50 @@
+{% extends 'base_content.html' %} {% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'dashboard' %}"
+    >Back to Tasks</a
+  >
+  <div class="row">
+    <div class="col">
+      <div class="row">
+        <div class="col mt-4">
+          <h3>
+            {{ task.task_heading }}
+          </h3>
+          <b><body>Description:</body></b><br>
+          <body class=>{{task.task_description}}</body>
+        </div>
+        <div class="col-md-auto">
+          <body>
+            <b>Created on:</b><br>{{task.creation_date}}</br>
+            <b>Last Edited on:</b><br>{{task.last_modified}}</br>
+            <b>Due on:</b><br>{{task.deadline_date}}</br>
+            <b>Created on:</b><br>{{task.task_complete}}</br>
+            </body></div>
+        <div class="col-sm-auto mt-4">
+          
+          {% if user in task.user_assigned.all and user != task.task_owner %}
+          <div class="row"><a href="{% url 'create_team' %}"
+            ><button type="button" class="btn btn-outline-danger w-100 mb-2">
+              Leave
+            </button></a
+          ></div>
+          {% endif %}
+          {% if user in task.user_assigned.all and user == task.task_owner %}
+          <div class="row"><a href="{% url 'create_team' %}"
+            ><button type="button" class="btn btn-danger w-100">
+              Delete
+            </button></a
+          ></div>
+          {% endif %}
+        </div>
+      </div>
+                
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

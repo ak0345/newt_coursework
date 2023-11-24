@@ -71,6 +71,15 @@ def show_team(request, team_id):
         return redirect("team_management")
     else:
         return render(request, "show_team.html", {"team": team})
+    
+@login_required
+def show_task(request, task_id):
+    try:
+        task = Task.objects.get(id=task_id)
+    except ObjectDoesNotExist:
+        return redirect("dashboard")
+    else:
+        return render(request, "show_task.html", {"task" : task})
 
 
 class LoginProhibitedMixin:
