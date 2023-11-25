@@ -143,6 +143,10 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             email=self.cleaned_data.get("email"),
             password=self.cleaned_data.get("new_password"),
         )
+        gravatar_url = user.gravatar()
+        user.gravatar_url = gravatar_url
+        if commit:
+            user.save()
         return user
 
 
