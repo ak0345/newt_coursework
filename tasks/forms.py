@@ -27,12 +27,13 @@ class LogInForm(forms.Form):
             password = self.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
         return user
-    
+
+
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['task_heading', 'task_description', 'user_assigned', 'team_assigned', 'deadline_date', 'task_complete']
-        exclude = ['task_complete'] 
+        exclude = ['task_complete']
 
     def save(self, user, commit=True):
         """Create a new team."""
@@ -46,7 +47,7 @@ class TaskForm(forms.ModelForm):
 
         new_task.save()
 
-        #new_task.user_assigned.set(self.cleaned_data["user_assigned"])
+        # new_task.user_assigned.set(self.cleaned_data["user_assigned"])
 
         return new_task
     
@@ -54,6 +55,7 @@ class TaskCompleteForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['task_complete']
+
 
 
 class UserForm(forms.ModelForm):
@@ -161,19 +163,17 @@ class TeamCreationForm(forms.ModelForm):
         model = Team
         fields = ["team_name", "unique_identifier", "description"]
 
-    def save(self, commit=True):
+    def save(self, user, commit=True):
         """Create a new team."""
-        if not self.is_valid():
-            raise ValueError("Cannot save the form. Please ensure the form is valid.")
-
         new_team = Team(
             team_name=self.cleaned_data["team_name"],
             unique_identifier=self.cleaned_data["unique_identifier"],
             description=self.cleaned_data["description"],
+            team_owner=user,
+            # Create a test for the above line to make sure we have access to the current user, and in a view, this is typically available in the request object.
         )
         new_team.save()
         new_team.users_in_team.set([user.id])
-      
-        new_team.save()
+        print(new_team.users_in_team)
 
         return new_team
