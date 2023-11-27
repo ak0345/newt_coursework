@@ -21,7 +21,17 @@
               Owner: {{ task.task_owner.username }}<br>
               Created: {{ task.creation_date }}<br>
               Deadline: {{ task.deadline_date }}<br>
-              Complete: {{ task.task_complete }}
+              {% if task.task_complete %}
+              <p>Completed</p>
+          {% else %}
+              <form method="post">
+                  {% csrf_token %}
+                  {{ form.task_complete }}
+                  <button type="submit">Mark as Complete</button>
+              </form>
+          {% endif %}
+
+
           </li>
       {% endfor %}
   </ul>

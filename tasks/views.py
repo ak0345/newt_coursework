@@ -205,8 +205,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'tasks': tasks})
 
 def create_task(request):
-    form = TaskForm()  # Create an instance of the form
-
+    form = TaskForm() 
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -215,6 +214,23 @@ def create_task(request):
 
     return render(request, 'create_task.html', {'form': form})
 
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Task
+from .forms import TaskCompleteForm  # Ensure you have this form defined
+
+def task_detail(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'POST':
+        form = TaskCompleteForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('task_detail', task_id=task.id)  # Redirect to the same page
+
+    else:
+        form = TaskCompleteForm(instance=task)
+
+    return render(request, 'task_detail.html', {'task': task, 'form': form})
 
 
 def create_team(request):

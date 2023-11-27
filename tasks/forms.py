@@ -32,6 +32,7 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['task_heading', 'task_description', 'user_assigned', 'team_assigned', 'deadline_date', 'task_complete']
+        exclude = ['task_complete'] 
 
     def save(self, user, commit=True):
         """Create a new team."""
@@ -40,8 +41,7 @@ class TaskForm(forms.ModelForm):
             task_description=self.cleaned_data["task_description"],
             task_owner=user,
             team_assigned=self.cleaned_data["team_assigned"],
-            deadline_date=self.cleaned_data["deadline_date"],
-            task_complete=self.cleaned_data["task_complete"],
+            deadline_date=self.cleaned_data["deadline_date"]
         )
 
         new_task.save()
@@ -49,6 +49,12 @@ class TaskForm(forms.ModelForm):
         #new_task.user_assigned.set(self.cleaned_data["user_assigned"])
 
         return new_task
+    
+class TaskCompleteForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['task_complete']
+
 
 class UserForm(forms.ModelForm):
     """Form to update user profiles."""
@@ -132,7 +138,7 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
         model = User
         fields = ["first_name", "last_name", "username", "email"]
 
-    def save(self):
+    def save(self, commit=True):
         """Create a new user."""
 
         super().save(commit=False)
