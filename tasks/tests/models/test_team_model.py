@@ -10,7 +10,7 @@ class TeamModelTestCase(TestCase):
     def setUp(self):
         self.team = Team.objects.get(
             team_name="Newt"
-        )  # Replace with appropriate team name from fixtures
+        ) 
 
     def test_valid_team_creation(self):
         self._assert_team_is_valid()

@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
 from datetime import datetime
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -48,6 +49,10 @@ class User(AbstractUser):
 
         return self.gravatar(size=60)
 
+def validate_future_date(value):
+    if value < timezone.now():
+        raise ValidationError("The date cannot be in the past.")
+
 
 class Task(models.Model):
     task_heading = models.CharField(max_length=50, blank=False)
@@ -64,7 +69,7 @@ class Task(models.Model):
     )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
-    deadline_date = models.DateTimeField(null=True, blank=True)
+    deadline_date = models.DateTimeField(null=True, blank=True, validators=[validate_future_date])
     task_complete = models.BooleanField(default=False)
 
     # allow one task to have sub-tasks without those sub-tasks necessarily having the original task as a parent.
@@ -82,6 +87,8 @@ class Task(models.Model):
 
     def __str__(self):
         return self.task_heading
+
+
 
 class Team(models.Model):
     team_name = models.CharField(max_length=100, unique=True, blank=False)
