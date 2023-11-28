@@ -1,12 +1,20 @@
-{% extends 'base_content.html' %} 
-{% block content %}
+{% extends 'base_content.html' %} {% block content %}
 <div class="container">
   <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
   <div class="row">
     <div class="col-md-auto mt-4">
       <h3>Your Notifications</h3>
     </div>
-
-    {% endblock %}
+    {% if everythingsearched %} {% for team in teamsfound %}
+    <li class="list-group-item mb-4"></li>
+    {% endfor %} {% for user in usersfound %}
+    <li class="list-group-item mb-4"></li>
+    {% endfor %} {% else %}
+    <li class="list-group-item">
+      <span class="text-muted">Invitation from Ali.</span>
+      <button>Accept</button>
+      <button>Reject</button>
+    </li>
+    {% endif %} {% endblock %}
   </div>
 </div>

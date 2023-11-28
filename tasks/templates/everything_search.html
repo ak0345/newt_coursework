@@ -16,9 +16,11 @@
             class="text-dark text-decoration-none"
             href="{% url 'show_team' team.id %}"
             ><span class="text-darktext-decoration-underline"
-              >#{{ team.team_name|yellow:everythingsearched }}</span
-            >{{" "}}<span class="text-muted"
-              >created by {{ team.team_owner|yellow:everythingsearched }}</span
+              >{{ team.team_name|yellow:everythingsearched }}&nbsp;</span
+            ><span class="text-muted"
+              >{{ team.unique_identifier|yellow:everythingsearched}}&nbsp;</span
+            ><span class="text-muted"
+              >created by&nbsp;{{team.team_owner|yellow:everythingsearched}}</span
             ></a
           >
         </li>
@@ -28,8 +30,8 @@
             ><span class="text-darktext-decoration-underline"
               >{{ user.username|yellow:everythingsearched }}</span
             >{{" "}}<span class="text-muted"
-              >{{ user.first_name|yellow:everythingsearched }}{{" "}}{{
-              user.last_name|yellow:everythingsearched }}</span
+              >{{ user.first_name|yellow:everythingsearched }}{{" "}}
+              {{user.last_name|yellow:everythingsearched }}</span
             ></a
           >
         </li>
