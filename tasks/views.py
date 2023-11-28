@@ -238,3 +238,7 @@ def create_team(request):
 def team_search(request):
     myteams = Team.objects.filter(team_owner_id=request.user.id)
     return render(request, "team_management.html", {"myteams": myteams})
+
+
+def notifications(request):
+    return render(request, "notifications.html")
