@@ -40,11 +40,11 @@
           <a
             class="text-dark text-decoration-none"
             href="{% url 'show_team' team.id %}"
-            ><span class="text-muted">#</span
             ><span class="text-darktext-decoration-underline"
-              >{{ team.team_name }}</span
-            >{{" "}}<span class="text-muted"
-              >created by {{ team.team_owner }}</span
+              >{{ team.team_name }}&nbsp;</span
+            ><span class="text-muted">{{ team.unique_identifier }}&nbsp;</span
+            ><span class="text-muted"
+              >created by&nbsp;{{ team.team_owner }}</span
             ></a
           >
         </li>

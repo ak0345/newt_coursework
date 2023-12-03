@@ -31,10 +31,17 @@ urlpatterns = [
     path("profile/", views.ProfileUpdateView.as_view(), name="profile"),
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("create_team/", create_team, name="create_team"),
+    path(
+        "create_invitation/<int:user_id>/<int:team_id>/",
+        views.create_invitation,
+        name="create_invitation",
+    ),
+    path("accept_invitation/", views.accept_invitation, name="accept_invitation"),
+    path("reject_invitation/", views.reject_invitation, name="reject_invitation"),
     path("create_task/", views.create_task, name="create_task"),
     path("team_management/", team_search, name="team_management"),
     path("team/<int:team_id>", views.show_team, name="show_team"),
     path("team_search/", views.lookup_team, name="lookup-team"),
     path("everything_search/", views.lookup_everything, name="lookup-everything"),
+    path("notifications/", views.notifications, name="notifications"),
 ]
-

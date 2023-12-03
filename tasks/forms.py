@@ -5,11 +5,27 @@ from django.core.validators import RegexValidator
 from .models import User
 from .models import Task
 from .models import Team
+from .models import Invitation
 from django.forms import ModelForm
 
 
 class TeamSearchForm(forms.Form):
     search_query = forms.CharField(label="Search Teams", max_length=100)
+
+
+class InvitationForm(forms.ModelForm):
+    class Meta:
+        model = Invitation
+        fields = [
+            "user_requesting_to_join",
+            "team_to_join",
+        ]
+
+    def save(self, user, team, commit=True):
+        """Create a new invitation."""
+        new_invitation = Invitation(user_requesting_to_join=user, team_to_join=team)
+        new_invitation.save()
+        return new_invitation
 
 
 class LogInForm(forms.Form):

@@ -17,7 +17,7 @@
             type="text"
             class="form-control"
             id="input_everything_name"
-            placeholder="Search for a #team, task, or @username here"
+            placeholder="Search for a #team, task, or @username here (case sensitive)"
             aria-label="Search Everything"
             aria-describedby="basic-addon1"
             name="everythingsearched"
@@ -47,9 +47,15 @@
         <li>
           <a class="dropdown-item" href="{% url 'profile' %}">Change profile</a>
         </li>
+
         <li>
           <a class="dropdown-item" href="{% url 'password' %}"
             >Change password</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="{% url 'notifications' %}"
+            >Notifications</a
           >
         </li>
         <li><hr class="dropdown-divider" /></li>

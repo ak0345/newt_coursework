@@ -11,10 +11,10 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
-from .models import Task
+from .models import Task, Invitation
 from .forms import TaskForm
 from .forms import TeamCreationForm
-from .forms import TeamSearchForm
+from .forms import TeamSearchForm, InvitationForm
 from .models import Team, User
 from django.http import HttpResponse
 from django.template import loader
@@ -38,6 +38,11 @@ def lookup_everything(request):
         )
     else:
         return render(request, "everything_search.html", {})
+
+
+def notifications(request):
+    mynotifications = Invitation.objects.all()
+    return render(request, "notifications.html", {"mynotifications": mynotifications})
 
 
 def lookup_team(request):
@@ -71,6 +76,30 @@ def show_team(request, team_id):
         return redirect("team_management")
     else:
         return render(request, "show_team.html", {"team": team})
+
+
+@login_required
+def create_invitation(request, user_id, team_id):
+    form = InvitationForm()  # Create an instance of the form
+    messages.success(
+        request,
+        f"Successfully requested to join {Team.objects.filter(id=team_id)[0].team_name}, awaiting approval from {Team.objects.filter(id=team_id)[0].team_owner}",
+    )
+    form = InvitationForm(request.POST)
+    form.save(user=request.user, team=Team.objects.get(id=team_id))
+    return redirect("dashboard")
+
+    return render(request, "create_team.html", {"form": form})
+
+
+@login_required
+def accept_invitation(request, user_id):
+    return redirect("team_management")
+
+
+@login_required
+def reject_invitation(request, user_id):
+    return redirect("team_management")
 
 
 class LoginProhibitedMixin:

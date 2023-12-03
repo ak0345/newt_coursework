@@ -111,3 +111,14 @@ class Team(models.Model):
             )
         ],
     )
+
+
+class Invitation(models.Model):
+    user_requesting_to_join = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+    )
+    team_to_join = models.ForeignKey(
+        "Team",
+        on_delete=models.CASCADE,
+    )

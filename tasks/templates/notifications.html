@@ -1,0 +1,42 @@
+{% extends 'base_content.html' %} {% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
+  <div class="row">
+    <div class="col">
+      <div class="row mt-4">
+        <h3 class="mb-4">Your Notifications:</h3>
+        {% if mynotifications %} {% for notification in mynotifications %}
+        {% if notification.team_to_join.team_owner.id == user.id %}
+        <li class="list-group-item">
+            <div class="row justify-content-md-center">
+              <div class="col">
+                <a class="text-dark text-decoration-none">
+                  <span class="text-darktext-decoration-underline"
+                    >{{ notification.user_requesting_to_join }}&nbsp;is
+                    requesting to join your
+                    team&nbsp;{{notification.team_to_join.team_name}}&nbsp;<span class="text-muted">{{notification.team_to_join.unique_identifier}}</span></span
+                  >
+                </a>
+              </div>
+              <div class="col-md-auto">
+                <button type="button" class="btn btn-success w-100">
+                  Accept
+                </button>
+              </div>
+              <div class="col-md-auto">
+                <button type="button" class="btn btn-danger w-100">
+                  Reject
+                </button>
+              </div>
+        </li>
+        {% endif %}
+        {% endfor %} {% else %}
+        <li class="list-group-item">
+          <span class="text-muted">No notifications.</span>
+        </li>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
