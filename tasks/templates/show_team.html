@@ -59,16 +59,16 @@
         <h3>Invite User:</h3>
         <div class="row-cols-auto mt-4">
           <div class="col">
-            <form method="POST" action="{% url 'lookup-team' %}">
+            <form method="POST" action="{% url 'invite_user' team.id %}">
               {% csrf_token %}
               <div class="row">
                 <div class="col mr-4">
                   <input
                     type="text"
                     class="form-control"
-                    id="input_team_name"
+                    id="input_username"
                     placeholder="Search @username"
-                    name="teamsearched"
+                    name="input_username"
                   />
                 </div>
                 

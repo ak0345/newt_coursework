@@ -47,6 +47,7 @@ urlpatterns = [
         name="reject_invitation",
     ),
     path("create_task/", views.create_task, name="create_task"),
+    path("invite_user/<int:team_id>", views.invite_user, name="invite_user"),
     path("team_management/", team_search, name="team_management"),
     path("team/<int:team_id>", views.show_team, name="show_team"),
     path("team_search/", views.lookup_team, name="lookup-team"),

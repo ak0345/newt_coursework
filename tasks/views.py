@@ -247,6 +247,30 @@ class SignUpView(LoginProhibitedMixin, FormView):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 
+def invite_user(request, team_id):
+    form = InvitationForm()
+    data = request.POST.dict()
+    username = data.get("input_username")
+    user = User.objects.get(username=username)
+    form.save(user=user, team=Team.objects.get(id=team_id))
+    messages.success(
+        request,
+        f"Successfully invited user {username}",
+    )
+    return redirect(request.META["HTTP_REFERER"])
+
+    # form = InvitationForm()  # Create an instance of the form
+    # messages.success(
+    #     request,
+    #     f"Successfully requested to join {Team.objects.filter(id=team_id)[0].team_name}, awaiting approval from {Team.objects.filter(id=team_id)[0].team_owner}",
+    # )
+    # form = InvitationForm(request.POST)
+    # form.save(user=request.user, team=Team.objects.get(id=team_id))
+    # return redirect("dashboard")
+
+    # return render(request, "create_team.html", {"form": form})
+
+
 @login_required
 def dashboard(request):
     tasks = Task.objects.filter(task_owner=request.user)
