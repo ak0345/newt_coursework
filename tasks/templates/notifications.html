@@ -19,14 +19,18 @@
                 </a>
               </div>
               <div class="col-md-auto">
-                <button type="button" class="btn btn-success w-100">
-                  Accept
-                </button>
+                <div class="row"><a href="{% url 'accept_invitation' notification.id %}">
+                  <button type="button" class="btn btn-success w-100">
+                    Accept
+                  </button></a
+                ></div>
               </div>
               <div class="col-md-auto">
-                <button type="button" class="btn btn-danger w-100">
-                  Reject
-                </button>
+                <div class="row"><a href="{% url 'reject_invitation' notification.id %}">
+                  <button type="button" class="btn btn-danger w-100">
+                    Reject
+                  </button></a
+                ></div>
               </div>
         </li>
         {% endif %}

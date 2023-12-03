@@ -93,13 +93,30 @@ def create_invitation(request, user_id, team_id):
 
 
 @login_required
-def accept_invitation(request, user_id):
-    return redirect("team_management")
+def accept_invitation(request, notification_id):
+    invitation = Invitation.objects.get(id=notification_id)
+    team = invitation.team_to_join
+    user = invitation.user_requesting_to_join
+    team.users_in_team.add(user)
+    # Delete invitation
+    invitation.delete()
+    messages.success(
+        request, f"Successfully added user {user.username} into team {team.team_name}!"
+    )
+    return redirect("notifications")
 
 
 @login_required
-def reject_invitation(request, user_id):
-    return redirect("team_management")
+def reject_invitation(request, notification_id):
+    invitation = Invitation.objects.get(id=notification_id)
+    team = invitation.team_to_join
+    user = invitation.user_requesting_to_join
+    # Delete invitation
+    invitation.delete()
+    messages.danger(
+        request, f"Rejected user {user.username} from joining team {team.team_name}."
+    )
+    return redirect("notifications")
 
 
 class LoginProhibitedMixin:
