@@ -11,7 +11,7 @@
       <div class="row mt-4">
         <h3 class="mb-4">Search results:</h3>
         {% if everythingsearched %} {% for team in teamsfound %}
-        <li class="list-group-item mb-4">
+        <li class="list-group-item">
           <a
             class="text-dark text-decoration-none"
             href="{% url 'show_team' team.id %}"
@@ -20,12 +20,13 @@
             ><span class="text-muted"
               >{{ team.unique_identifier|yellow:everythingsearched}}&nbsp;</span
             ><span class="text-muted"
-              >created by&nbsp;{{team.team_owner|yellow:everythingsearched}}</span
+              >created
+              by&nbsp;{{team.team_owner|yellow:everythingsearched}}</span
             ></a
           >
         </li>
         {% endfor %} {% for user in usersfound %}
-        <li class="list-group-item mb-4">
+        <li class="list-group-item">
           <a class="text-dark text-decoration-none"
             ><span class="text-darktext-decoration-underline"
               >{{ user.username|yellow:everythingsearched }}</span
