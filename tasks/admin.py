@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Task, Team, Invitation
+from .models import User, Task, Team
 
 # Register your models here.
 
@@ -40,9 +40,4 @@ class TaskAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(Invitation)
-class TaskAdmin(admin.ModelAdmin):
-    list_display = [
-        "team_to_join",
-        "user_requesting_to_join",
-    ]
+

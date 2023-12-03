@@ -1,4 +1,5 @@
-{% extends 'base_content.html' %} {% block content %}
+{% extends 'base_content.html' %}
+{% block content %}
 <div class="container">
   <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
   <div class="row-cols-auto">
@@ -25,29 +26,40 @@
         </form>
       </div>
       <div class="col-sm-auto">
-        <a href="{% url 'create_team' %}"
-          ><button type="button" class="btn btn-success">
+        <a href="{% url 'create_team' %}">
+          <button type="button" class="btn btn-success">
             + Create Team
-          </button></a
-        >
+          </button>
+        </a>
       </div>
     </div>
     <div class="row mt-4">
       <h3>Your Teams</h3>
       <ul class="list-group list-group-flush">
         {% for team in myteams %}
-        <li class="list-group-item">
-          <a
-            class="text-dark text-decoration-none"
-            href="{% url 'show_team' team.id %}"
-            ><span class="text-darktext-decoration-underline"
-              >{{ team.team_name }}&nbsp;</span
-            ><span class="text-muted">{{ team.unique_identifier }}&nbsp;</span
-            ><span class="text-muted"
-              >created by&nbsp;{{ team.team_owner }}</span
-            ></a
-          >
-        </li>
+          {% if user == team.team_owner or user in team.users_in_team.all %}
+            <li class="list-group-item">
+              <a class="text-dark text-decoration-none" href="{% url 'show_team' team.id %}">
+                <span class="text-muted">#</span>
+                <span class="text-dark text-decoration-underline">{{ team.team_name }}</span>
+                {{ " " }}
+                <span class="text-muted">Owned by {{ team.team_owner }}</span>
+              </a>
+            </li>
+          {% elif user not in team.users_in_team.all %}
+            {% for member in team.users_in_team.all %}
+              {% if user == member %}
+                <li class="list-group-item">
+                  <a class="text-dark text-decoration-none" href="{% url 'show_team' team.id %}">
+                    <span class="text-muted">#</span>
+                    <span class="text-dark text-decoration-underline">{{ team.team_name }}</span>
+                    {{ " " }}
+                    <span class="text-muted">created by {{ team.team_owner }}</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         {% endfor %}
       </ul>
     </div>

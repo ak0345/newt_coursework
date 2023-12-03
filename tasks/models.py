@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
 from datetime import datetime
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -49,6 +50,25 @@ class User(AbstractUser):
 
 
 class Task(models.Model):
+    NOT_STARTED = "Not Started"
+    IN_PROGRESS = "In Progress"
+    COMPLETED = "Completed"
+
+    STATUS_CHOICES = [
+        (NOT_STARTED, "Not Started"),
+        (IN_PROGRESS, "In Progress"),
+        (COMPLETED, "Completed"),
+    ]
+
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+
+    PRIORITY_CHOICES = [
+        (HIGH, "High"),
+        (MEDIUM, "Medium"),
+        (LOW, "Low"),
+    ]
     task_heading = models.CharField(max_length=50, blank=False)
     task_description = models.CharField(max_length=160, null=True, blank=True)
     team_assigned = models.ForeignKey(
@@ -56,37 +76,59 @@ class Task(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="team_assigned",
+        related_name="team_assigned_tasks",
     )
     task_owner = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="tasks_owned", default=0
+        "User",
+        on_delete=models.CASCADE,
+        related_name="tasks_owned",
     )
     user_assigned = models.ManyToManyField(
         "User",
         blank=True,
-        related_name="assigned_users",
+        related_name="assigned_tasks",
     )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     deadline_date = models.DateTimeField(null=True, blank=True)
     task_complete = models.BooleanField(default=False)
+    completion_time = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=NOT_STARTED
+    )
 
-    # allow one task to have sub-tasks without those sub-tasks necessarily having the original task as a parent.
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=LOW)
+
     sub_tasks = models.ManyToManyField(
         "self", blank=True, symmetrical=False, related_name="subtasks"
     )
 
     class Meta:
-        """Model options."""
-
         ordering = ["task_heading"]
 
-    def __str__(self):
-        return self.task_heading
+    NOT_STARTED = "Not Started"
+    IN_PROGRESS = "In Progress"
+    COMPLETED = "Completed"
+
+    STATUS_CHOICES = [
+        (NOT_STARTED, "Not Started"),
+        (IN_PROGRESS, "In Progress"),
+        (COMPLETED, "Completed"),
+    ]
+
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+
+    PRIORITY_CHOICES = [
+        (HIGH, "High"),
+        (MEDIUM, "Medium"),
+        (LOW, "Low"),
+    ]
 
 
 class Team(models.Model):
-    team_name = models.CharField(max_length=100, blank=False)
+    team_name = models.CharField(max_length=100, unique=True, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
         "User",
@@ -94,6 +136,7 @@ class Team(models.Model):
         related_name="teams_owned",
         default="default_owner",
     )
+
     users_in_team = models.ManyToManyField(
         "User",
         blank=True
@@ -113,12 +156,10 @@ class Team(models.Model):
     )
 
 
-class Invitation(models.Model):
-    user_requesting_to_join = models.ForeignKey(
-        "User",
-        on_delete=models.CASCADE,
-    )
-    team_to_join = models.ForeignKey(
-        "Team",
-        on_delete=models.CASCADE,
-    )
+class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def comment_description(self):
+        return f"Comment on {self.task.task_heading}"
