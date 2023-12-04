@@ -5,7 +5,8 @@
     <div class="col">
       <div class="row mt-4">
         <h3 class="mb-4">Your Notifications:</h3>
-        {% if mynotifications %} {% for notification in mynotifications %}
+        {% if mynotifications %} 
+        {% for notification in mynotifications %}
         {% if notification.team_to_join.team_owner.id == user.id %}
         <li class="list-group-item">
             <div class="row justify-content-md-center">
@@ -34,10 +35,10 @@
               </div>
         </li>
         {% endif %}
-        {% if notification.user_requesting_to_join.id == user.id %}
+        {% if notification.user_requesting_to_join.id == user.id and notification.user_creating_invitation.id != request.user.id %}
         <li class="list-group-item">
             <div class="row justify-content-md-center">
-              <div class="col">
+              <div class="col align-self-center">
                 <a class="text-dark text-decoration-none">
                   <span class="text-darktext-decoration-underline"
                     >{{ notification.team_to_join.team_owner.username }}&nbsp;is

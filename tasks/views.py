@@ -86,7 +86,11 @@ def create_invitation(request, user_id, team_id):
         f"Successfully requested to join {Team.objects.filter(id=team_id)[0].team_name}, awaiting approval from {Team.objects.filter(id=team_id)[0].team_owner}",
     )
     form = InvitationForm(request.POST)
-    form.save(user=request.user, team=Team.objects.get(id=team_id))
+    form.save(
+        user=request.user,
+        team=Team.objects.get(id=team_id),
+        inviting=request.user,
+    )
     return redirect("dashboard")
 
     return render(request, "create_team.html", {"form": form})
@@ -113,7 +117,7 @@ def reject_invitation(request, notification_id):
     user = invitation.user_requesting_to_join
     # Delete invitation
     invitation.delete()
-    messages.danger(
+    messages.error(
         request, f"Rejected user {user.username} from joining team {team.team_name}."
     )
     return redirect("notifications")
@@ -247,28 +251,21 @@ class SignUpView(LoginProhibitedMixin, FormView):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 
-def invite_user(request, team_id):
+def invite_user(request, team_id, inviting_id):
     form = InvitationForm()
     data = request.POST.dict()
     username = data.get("input_username")
     user = User.objects.get(username=username)
-    form.save(user=user, team=Team.objects.get(id=team_id))
+    form.save(
+        user=user,
+        team=Team.objects.get(id=team_id),
+        inviting=User.objects.get(id=inviting_id),
+    )
     messages.success(
         request,
         f"Successfully invited user {username}",
     )
     return redirect(request.META["HTTP_REFERER"])
-
-    # form = InvitationForm()  # Create an instance of the form
-    # messages.success(
-    #     request,
-    #     f"Successfully requested to join {Team.objects.filter(id=team_id)[0].team_name}, awaiting approval from {Team.objects.filter(id=team_id)[0].team_owner}",
-    # )
-    # form = InvitationForm(request.POST)
-    # form.save(user=request.user, team=Team.objects.get(id=team_id))
-    # return redirect("dashboard")
-
-    # return render(request, "create_team.html", {"form": form})
 
 
 @login_required

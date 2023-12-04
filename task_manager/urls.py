@@ -32,7 +32,7 @@ urlpatterns = [
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("create_team/", create_team, name="create_team"),
     path(
-        "create_invitation/<int:user_id>/<int:team_id>/",
+        "create_invitation/<int:user_id>/<int:team_id>",
         views.create_invitation,
         name="create_invitation",
     ),
@@ -47,7 +47,11 @@ urlpatterns = [
         name="reject_invitation",
     ),
     path("create_task/", views.create_task, name="create_task"),
-    path("invite_user/<int:team_id>", views.invite_user, name="invite_user"),
+    path(
+        "invite_user/<int:team_id>/<int:inviting_id>",
+        views.invite_user,
+        name="invite_user",
+    ),
     path("team_management/", team_search, name="team_management"),
     path("team/<int:team_id>", views.show_team, name="show_team"),
     path("team_search/", views.lookup_team, name="lookup-team"),

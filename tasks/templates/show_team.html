@@ -45,11 +45,23 @@
         <ul class="list-group list-group-flush">
           {% for user in team.users_in_team.all %}
           <li class="list-group-item">
-              <span class="text-muted">{{ user.username }}</span
-              >{{" "}}
-              {% if request.user == user %}
-              <span class="text-muted">(you)</span>
+            <div class="row">
+              <div class="col align-self-center">
+                <div class="">
+                  <span class="text-muted">{{ user.username }}</span
+                  >{{" "}}
+                  {% if request.user == user %}
+                  <span class="text-muted">(you)</span>
+                  {% endif %}
+                  </div>
+              </div>
+              {% if request.user != user and request.user.id == team.team_owner.id %}
+              <div class="col-md-auto">
+                <button class="btn btn-outline-danger w-100">Remove</button>
+              </div>
               {% endif %}
+            </div>
+            
           </li>
           {% endfor %}
         </ul>
@@ -59,7 +71,7 @@
         <h3>Invite User:</h3>
         <div class="row-cols-auto mt-4">
           <div class="col">
-            <form method="POST" action="{% url 'invite_user' team.id %}">
+            <form method="POST" action="{% url 'invite_user' team.id request.user.id %}">
               {% csrf_token %}
               <div class="row">
                 <div class="col mr-4">
