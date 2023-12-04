@@ -263,10 +263,31 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
 
 def invite_user(request, team_id, inviting_id):
-    form = InvitationForm()
     data = request.POST.dict()
     username = data.get("input_username")
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        messages.error(
+            request,
+            "User does not exist.",
+        )
+        return redirect(request.META["HTTP_REFERER"])
+
+    form = InvitationForm()
     user = User.objects.get(username=username)
+
+    invitations_with_team = Invitation.objects.filter(
+        team_to_join=Team.objects.get(id=team_id)
+    )
+    for invitation in invitations_with_team:
+        if invitation.user_requesting_to_join.id == user.id:
+            messages.error(
+                request,
+                "Request already exists. Awaiting approval from team owner or user's notifications.",
+            )
+        return redirect(request.META["HTTP_REFERER"])
+
     form.save(
         user=user,
         team=Team.objects.get(id=team_id),
