@@ -8,7 +8,7 @@
       <div class="row mt-4">
         <h3 class="mb-4">Search results:</h3>
         {% if teamsearched %} {% for team in teamsfound %}
-        <li class="list-group-item mb-4">
+        <li class="list-group-item">
           <a
             class="text-dark text-decoration-none"
             href="{% url 'show_team' team.id %}"

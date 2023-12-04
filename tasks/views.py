@@ -20,6 +20,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.urls import reverse
 from django.forms.models import model_to_dict
+from django.db.models import Q
 
 
 def lookup_everything(request):
@@ -80,26 +81,57 @@ def show_team(request, team_id):
 
 @login_required
 def create_invitation(request, user_id, team_id):
-    form = InvitationForm()  # Create an instance of the form
+    form = InvitationForm(request.POST)
+    # Check if invitation already exists for the current team and user
+
+    invitations_with_team = Invitation.objects.filter(
+        team_to_join=Team.objects.get(id=team_id)
+    )
+    for invitation in invitations_with_team:
+        if invitation.user_requesting_to_join.id == user_id:
+            messages.error(
+                request,
+                "Request already exists. Awaiting approval from team owner or current user's notifications.",
+            )
+        return redirect(request.META["HTTP_REFERER"])
+
+    form.save(
+        user=request.user,
+        team=Team.objects.get(id=team_id),
+        inviting=request.user,
+    )
     messages.success(
         request,
         f"Successfully requested to join {Team.objects.filter(id=team_id)[0].team_name}, awaiting approval from {Team.objects.filter(id=team_id)[0].team_owner}",
     )
-    form = InvitationForm(request.POST)
-    form.save(user=request.user, team=Team.objects.get(id=team_id))
-    return redirect("dashboard")
-
-    return render(request, "create_team.html", {"form": form})
+    return redirect(request.META["HTTP_REFERER"])
 
 
 @login_required
-def accept_invitation(request, user_id):
-    return redirect("team_management")
+def accept_invitation(request, notification_id):
+    invitation = Invitation.objects.get(id=notification_id)
+    team = invitation.team_to_join
+    user = invitation.user_requesting_to_join
+    team.users_in_team.add(user)
+    # Delete invitation
+    invitation.delete()
+    messages.success(
+        request, f"Successfully added user {user.username} into team {team.team_name}!"
+    )
+    return redirect("notifications")
 
 
 @login_required
-def reject_invitation(request, user_id):
-    return redirect("team_management")
+def reject_invitation(request, notification_id):
+    invitation = Invitation.objects.get(id=notification_id)
+    team = invitation.team_to_join
+    user = invitation.user_requesting_to_join
+    # Delete invitation
+    invitation.delete()
+    messages.error(
+        request, f"Rejected user {user.username} from joining team {team.team_name}."
+    )
+    return redirect("notifications")
 
 
 class LoginProhibitedMixin:
@@ -230,6 +262,44 @@ class SignUpView(LoginProhibitedMixin, FormView):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 
+def invite_user(request, team_id, inviting_id):
+    data = request.POST.dict()
+    username = data.get("input_username")
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        messages.error(
+            request,
+            "User does not exist.",
+        )
+        return redirect(request.META["HTTP_REFERER"])
+
+    form = InvitationForm()
+    user = User.objects.get(username=username)
+
+    invitations_with_team = Invitation.objects.filter(
+        team_to_join=Team.objects.get(id=team_id)
+    )
+    for invitation in invitations_with_team:
+        if invitation.user_requesting_to_join.id == user.id:
+            messages.error(
+                request,
+                "Request already exists. Awaiting approval from team owner or user's notifications.",
+            )
+        return redirect(request.META["HTTP_REFERER"])
+
+    form.save(
+        user=user,
+        team=Team.objects.get(id=team_id),
+        inviting=User.objects.get(id=inviting_id),
+    )
+    messages.success(
+        request,
+        f"Successfully invited user {username}",
+    )
+    return redirect(request.META["HTTP_REFERER"])
+
+
 @login_required
 def dashboard(request):
     tasks = Task.objects.filter(task_owner=request.user)
@@ -264,6 +334,17 @@ def create_team(request):
     return render(request, "create_team.html", {"form": form})
 
 
+def leave_team(request, user_id, team_id):
+    team = Team.objects.get(id=team_id)
+    user = User.objects.get(id=user_id)
+    team.users_in_team.remove(user)
+    messages.success(request, f"Successfully left team {team.team_name}")
+    return redirect("team_management")
+
+
 def team_search(request):
-    myteams = Team.objects.filter(team_owner_id=request.user.id)
+    myteams = (
+        Team.objects.filter(team_owner_id=request.user.id)
+        | Team.objects.filter(users_in_team=request.user.id)
+    ).distinct()
     return render(request, "team_management.html", {"myteams": myteams})

@@ -45,4 +45,5 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = [
         "team_to_join",
         "user_requesting_to_join",
+        "user_creating_invitation",
     ]

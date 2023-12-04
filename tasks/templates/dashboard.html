@@ -1,18 +1,22 @@
 {% extends 'base_content.html' %} 
 {% block content %}
 <div class="container">
-  <div class="row">
-    <div class="col-12 mt-4">
+  <div class="row justify-content-center mt-5">
+    <div class="col ">
       <h3>Welcome to your dashboard, {{ user.first_name }}</h3>
       <h5 class="text-muted">Logged in as {{ user.username }}</h5>
     </div>
+    <div class="col-md-auto">
+      <a href='{% url 'create_task' %}' class="btn btn-dark">
+        + Create Task
+      </a>
+    </div>
   </div>
-  <a href='{% url 'create_task' %}' class="btn btn-lg btn-secondary">
-    Create Task
-  </a>
-  <ul>
+  
+  <div class="container mt-4">
+    <div class="row">
       {% for task in tasks %}
-          <li>
+          <span class="col-3 border rounded p-4">
               <strong>{{ task.task_heading }}</strong><br>
               Description: {{ task.task_description }}<br>
               User Assigned: {{ task.assigned_users }} <br>
@@ -20,8 +24,10 @@
               Created: {{ task.creation_date }}<br>
               Deadline: {{ task.deadline_date }}<br>
               Complete: {{ task.task_complete }}
-          </li>
+          </span>
+          <span class="col-1"></span>
       {% endfor %}
-  </ul>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -21,9 +21,13 @@ class InvitationForm(forms.ModelForm):
             "team_to_join",
         ]
 
-    def save(self, user, team, commit=True):
+    def save(self, user, team, inviting, commit=True):
         """Create a new invitation."""
-        new_invitation = Invitation(user_requesting_to_join=user, team_to_join=team)
+        new_invitation = Invitation(
+            user_requesting_to_join=user,
+            team_to_join=team,
+            user_creating_invitation=inviting,
+        )
         new_invitation.save()
         return new_invitation
 
