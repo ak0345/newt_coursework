@@ -28,11 +28,11 @@
         {% endfor %} {% for user in usersfound %}
         <li class="list-group-item">
           <a class="text-dark text-decoration-none"
-            ><span class="text-darktext-decoration-underline"
-              >{{ user.username|yellow:everythingsearched }}</span
-            >{{" "}}<span class="text-muted"
-              >{{ user.first_name|yellow:everythingsearched }}{{" "}}
+            ><span
+              >{{ user.first_name|yellow:everythingsearched }}&nbsp;
               {{user.last_name|yellow:everythingsearched }}</span
+            >&nbsp;<span class="text-muted"
+              >{{ user.username|yellow:everythingsearched }}</span
             ></a
           >
         </li>

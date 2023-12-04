@@ -38,6 +38,12 @@ class TaskAdmin(admin.ModelAdmin):
         "task_owner",
         "task_complete",
     ]
-
-
-
+    
+    
+@admin.register(Invitation)
+class InviteAdmin(admin.ModelAdmin):
+    list_display = [
+        "team_to_join",
+        "user_requesting_to_join",
+        "user_creating_invitation",
+    ]

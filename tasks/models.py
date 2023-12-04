@@ -163,3 +163,20 @@ class Comment(models.Model):
 
     def comment_description(self):
         return f"Comment on {self.task.task_heading}"
+
+      
+class Invitation(models.Model):
+    user_requesting_to_join = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        related_name="user_requesting_to_join",
+    )
+    user_creating_invitation = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        related_name="user_creating_invitation",
+    )
+    team_to_join = models.ForeignKey(
+        "Team",
+        on_delete=models.CASCADE,
+    )

@@ -9,14 +9,8 @@ register = template.Library()
 def yellow(text, value):
     if text is not None:
         text = str(text)
-        if text.istitle():
-            src_str = re.compile(value)
-            str_replaced = src_str.sub(
-                f'<span class="yellow">{value.capitalize()}</span>', text
-            )
-        else:
-            src_str = re.compile(value)
-            str_replaced = src_str.sub(f'<span class="yellow">{value}</span>', text)
+        src_str = re.compile(value)
+        str_replaced = src_str.sub(f'<span class="yellow">{value}</span>', text)
     else:
         str_replaced = ""
 

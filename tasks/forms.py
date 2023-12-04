@@ -12,6 +12,24 @@ class TeamSearchForm(forms.Form):
     search_query = forms.CharField(label="Search Teams", max_length=100)
 
 
+class InvitationForm(forms.ModelForm):
+    class Meta:
+        model = Invitation
+        fields = [
+            "user_requesting_to_join",
+            "team_to_join",
+        ]
+
+    def save(self, user, team, inviting, commit=True):
+        """Create a new invitation."""
+        new_invitation = Invitation(
+            user_requesting_to_join=user,
+            team_to_join=team,
+            user_creating_invitation=inviting,
+        )
+        new_invitation.save()
+        return new_invitation
+
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
 
@@ -27,10 +45,6 @@ class LogInForm(forms.Form):
             password = self.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
         return user
-
-
-from django import forms
-from .models import Task  # Import your Task model
 
 
 class TaskForm(forms.ModelForm):

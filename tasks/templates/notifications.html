@@ -5,11 +5,12 @@
     <div class="col">
       <div class="row mt-4">
         <h3 class="mb-4">Your Notifications:</h3>
-        {% if mynotifications %} {% for notification in mynotifications %}
+        {% if mynotifications %} 
+        {% for notification in mynotifications %}
         {% if notification.team_to_join.team_owner.id == user.id %}
         <li class="list-group-item">
             <div class="row justify-content-md-center">
-              <div class="col">
+              <div class="col align-self-center">
                 <a class="text-dark text-decoration-none">
                   <span class="text-darktext-decoration-underline"
                     >{{ notification.user_requesting_to_join }}&nbsp;is
@@ -19,14 +20,45 @@
                 </a>
               </div>
               <div class="col-md-auto">
-                <button type="button" class="btn btn-success w-100">
-                  Accept
-                </button>
+                <div class="row"><a href="{% url 'accept_invitation' notification.id %}">
+                  <button type="button" class="btn btn-success w-100">
+                    Accept
+                  </button></a
+                ></div>
               </div>
               <div class="col-md-auto">
-                <button type="button" class="btn btn-danger w-100">
-                  Reject
-                </button>
+                <div class="row"><a href="{% url 'reject_invitation' notification.id %}">
+                  <button type="button" class="btn btn-danger w-100">
+                    Reject
+                  </button></a
+                ></div>
+              </div>
+        </li>
+        {% endif %}
+        {% if notification.user_requesting_to_join.id == user.id and notification.user_creating_invitation.id != request.user.id %}
+        <li class="list-group-item">
+            <div class="row justify-content-md-center">
+              <div class="col align-self-center">
+                <a class="text-dark text-decoration-none">
+                  <span class="text-darktext-decoration-underline"
+                    >{{ notification.team_to_join.team_owner.username }}&nbsp;is
+                    inviting you to join team&nbsp;{{notification.team_to_join.team_name}}&nbsp;<span class="text-muted">{{notification.team_to_join.unique_identifier}}</span></span
+                  >
+                </a>
+              </div>
+              <div class="col-md-auto">
+                <div class="row"><a href="{% url 'accept_invitation' notification.id %}">
+                  <button type="button" class="btn btn-success w-100">
+                    Accept
+                  </button></a
+                ></div>
+              </div>
+              <div class="col-md-auto">
+                <div class="row"><a href="{% url 'reject_invitation' notification.id %}">
+                  <button type="button" class="btn btn-danger w-100">
+                    Reject
+                  </button></a
+                ></div>
               </div>
         </li>
         {% endif %}
