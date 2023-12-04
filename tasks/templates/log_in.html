@@ -7,7 +7,7 @@
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next }}" />
         {% include 'partials/bootstrap_form.html' with form=form %}
-        <input  type="submit" value="Log in" class="btn btn-dark" />
+        <input type="submit" value="Log in" class="btn btn-dark" />
       </form>
     </div>
   </div>
