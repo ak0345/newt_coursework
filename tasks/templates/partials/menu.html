@@ -38,7 +38,11 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
+      {% if user.gravatar_url != null %}
+        <img src="{{ user.gravatar }}" alt="User's Gravatar" class="rounded mx-auto d-block" >
+        {% else %}
         <span class="bi-person-circle"></span>
+        {% endif %}
       </a>
       <ul
         class="dropdown-menu dropdown-menu-end"

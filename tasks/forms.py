@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from .models import User
 from .models import Task
 from .models import Team
+from .models import Invitation
 from django.forms import ModelForm
 
 
@@ -48,8 +49,6 @@ class LogInForm(forms.Form):
 
 
 class TaskForm(forms.ModelForm):
-    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
-
     class Meta:
         model = Task
         fields = [
@@ -60,9 +59,15 @@ class TaskForm(forms.ModelForm):
             "deadline_date",
             "task_complete",
         ]
+    
+    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
+    user_assigned = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
+    team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
 
     def save(self, user, commit=True):
-        """Create a new task."""
         new_task = Task(
             task_heading=self.cleaned_data["task_heading"],
             task_description=self.cleaned_data["task_description"],
@@ -74,6 +79,8 @@ class TaskForm(forms.ModelForm):
         )
 
         new_task.save()
+
+        new_task.user_assigned.set(self.cleaned_data["user_assigned"])
 
         return new_task
 
@@ -91,7 +98,7 @@ class UserForm(forms.ModelForm):
         """Form options."""
 
         model = User
-        fields = ["first_name", "last_name", "username", "email"]
+        fields = ["first_name", "last_name", "gravatar_url", "username", "email"]
 
 
 class NewPasswordMixin(forms.Form):

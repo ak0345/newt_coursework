@@ -12,9 +12,11 @@ from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
 from .models import Task
+from .models import Invitation
 from .forms import TaskForm
 from .forms import EditTaskForm
 from .forms import EditTeamForm
+from .forms import InvitationForm
 from django.http import HttpResponseForbidden
 from .forms import TeamCreationForm
 from .forms import TeamSearchForm
