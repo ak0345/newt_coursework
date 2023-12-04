@@ -1,13 +1,11 @@
-{% extends 'base_content.html' %}
-{% block content %}
+{% extends 'base_content.html' %} {% block content %}
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h1>Sign up</h1>
+      <h3 class="mb-4">Sign up</h3>
       <form action="{% url 'sign_up' %}" method="post">
-        {% csrf_token %}
-        {% include 'partials/bootstrap_form.html' with form=form %}
-        <input type="submit" value="Sign up" class="btn btn-primary">
+        {% csrf_token %} {% include 'partials/bootstrap_form.html' with form=form %}
+        <input  type="submit" value="Sign up" class="btn btn-outline-dark" />
       </form>
     </div>
   </div>

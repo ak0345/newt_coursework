@@ -338,7 +338,7 @@ def leave_team(request, user_id, team_id):
     team = Team.objects.get(id=team_id)
     user = User.objects.get(id=user_id)
     team.users_in_team.remove(user)
-    messages.success(f"Successfully left team {team.team_name}")
+    messages.success(request, f"Successfully left team {team.team_name}")
     return redirect("team_management")
 
 
