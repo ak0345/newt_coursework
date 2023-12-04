@@ -31,6 +31,7 @@ urlpatterns = [
     path("profile/", views.ProfileUpdateView.as_view(), name="profile"),
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("create_team/", create_team, name="create_team"),
+    path("leave_team/<int:user_id>/<int:team_id>", views.leave_team, name="leave_team"),
     path(
         "create_invitation/<int:user_id>/<int:team_id>",
         views.create_invitation,
