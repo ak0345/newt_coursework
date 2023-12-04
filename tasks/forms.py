@@ -5,7 +5,6 @@ from django.core.validators import RegexValidator
 from .models import User
 from .models import Task
 from .models import Team
-from .models import Invitation
 from django.forms import ModelForm
 
 
@@ -31,7 +30,6 @@ class InvitationForm(forms.ModelForm):
         new_invitation.save()
         return new_invitation
 
-
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
 
@@ -50,6 +48,8 @@ class LogInForm(forms.Form):
 
 
 class TaskForm(forms.ModelForm):
+    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
+
     class Meta:
         model = Task
         fields = [
@@ -62,7 +62,7 @@ class TaskForm(forms.ModelForm):
         ]
 
     def save(self, user, commit=True):
-        """Create a new team."""
+        """Create a new task."""
         new_task = Task(
             task_heading=self.cleaned_data["task_heading"],
             task_description=self.cleaned_data["task_description"],
@@ -70,13 +70,18 @@ class TaskForm(forms.ModelForm):
             team_assigned=self.cleaned_data["team_assigned"],
             deadline_date=self.cleaned_data["deadline_date"],
             task_complete=self.cleaned_data["task_complete"],
+            priority=self.cleaned_data["priority"],
         )
 
         new_task.save()
 
-        # new_task.user_assigned.set(self.cleaned_data["user_assigned"])
-
         return new_task
+
+
+class EditTaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        exclude = ["task_owner", "task_complete", "completion_time", "status"]
 
 
 class UserForm(forms.ModelForm):
@@ -181,16 +186,34 @@ class TeamCreationForm(forms.ModelForm):
         fields = ["team_name", "unique_identifier", "description"]
 
     def save(self, user, commit=True):
-        """Create a new team."""
+        """Create a new team or update an existing team."""
         new_team = Team(
             team_name=self.cleaned_data["team_name"],
             unique_identifier=self.cleaned_data["unique_identifier"],
             description=self.cleaned_data["description"],
             team_owner=user,
-            # Create a test for the above line to make sure we have access to the current user, and in a view, this is typically available in the request object.
         )
-        new_team.save()
-        new_team.users_in_team.set([user.id])
-        print(new_team.users_in_team)
+
+        if commit:
+            new_team.save()
+            new_team.users_in_team.set([user.id])
 
         return new_team
+
+
+class EditTeamForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ["team_name", "unique_identifier", "description", "team_owner"]
+
+    def save(self, user, team_instance, commit=True):
+        """Update an existing team."""
+        team_instance.team_name = self.cleaned_data["team_name"]
+        team_instance.team_owner = self.cleaned_data["team_owner"]
+        team_instance.unique_identifier = self.cleaned_data["unique_identifier"]
+        team_instance.description = self.cleaned_data["description"]
+
+        if commit:
+            team_instance.save()
+
+        return team_instance

@@ -1,0 +1,15 @@
+{% extends 'base_content.html' %}
+
+{% block content %}
+<div class="container">
+  <a href='{% url 'team_management' %}' class="btn btn-lg btn-secondary">
+    Go Back
+  </a>
+  <h1>Edit team</h1>
+  <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-lg btn-secondary">Update team</button>
+  </form>
+</div>
+{% endblock %}

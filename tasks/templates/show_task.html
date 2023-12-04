@@ -1,0 +1,44 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
+  <div class="row">
+    <div class="col mt-4">
+      <h3>
+        {{ task.task_heading }}
+      </h3>
+      <p>Description: {{ task.task_description }}</p>
+      <p>User Assigned: 
+        {% if task.user_assigned %}
+          {{ task.user_assigned.username }}
+        {% else %}
+          No user assigned
+        {% endif %}
+      </p>
+      <p>Owner: {{ task.task_owner.username }}</p>
+      <p>Created: {{ task.creation_date }}</p>
+      <p>Deadline: {{ task.deadline_date }}</p>
+      <p>Complete: {% if task.task_complete %} True {% else %} False {% endif %}</p>
+    </div>
+    <div class="col-md-auto"></div>
+    <div class="col-sm-auto mt-4">
+      <!-- Buttons similar to the team management template -->
+      <div class="row">
+        <!-- Replace URLs and button text with appropriate actions -->
+        <!-- Example buttons, modify as per your task actions -->
+        <a href="{% url 'edit_task' task.id %}">
+          <button type="button" class="btn btn-outline-dark w-100 mb-2">Edit Task</button>
+        </a>
+      </div>
+      <div class="row">
+        <form method="POST" action="{% url 'delete_task' task.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger w-100">Delete Task</button>
+        </form>
+      </div>
+      <!-- Add other buttons based on task actions -->
+    </div>
+  </div>
+  <!-- Additional sections related to the task if needed -->
+</div>
+{% endblock %}
