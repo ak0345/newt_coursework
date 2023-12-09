@@ -11,15 +11,24 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
-from .models import Task, Invitation
+from .models import Task
+from .models import Invitation
 from .forms import TaskForm
+from .forms import EditTaskForm
+from .forms import EditTeamForm
+from .forms import InvitationForm
+from django.http import HttpResponseForbidden
 from .forms import TeamCreationForm
-from .forms import TeamSearchForm, InvitationForm
+from .forms import TeamSearchForm
 from .models import Team, User
+from tasks.models import User
 from django.http import HttpResponse
 from django.template import loader
 from django.urls import reverse
 from django.forms.models import model_to_dict
+from datetime import datetime
+from django.utils import timezone
+from .models import Comment
 from django.db.models import Q
 
 
@@ -39,11 +48,6 @@ def lookup_everything(request):
         )
     else:
         return render(request, "everything_search.html", {})
-
-
-def notifications(request):
-    mynotifications = Invitation.objects.all()
-    return render(request, "notifications.html", {"mynotifications": mynotifications})
 
 
 def lookup_team(request):
@@ -77,7 +81,6 @@ def show_team(request, team_id):
         return redirect("team_management")
     else:
         return render(request, "show_team.html", {"team": team})
-
 
 @login_required
 def create_invitation(request, user_id, team_id):
@@ -132,7 +135,6 @@ def reject_invitation(request, notification_id):
         request, f"Rejected user {user.username} from joining team {team.team_name}."
     )
     return redirect("notifications")
-
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
@@ -307,6 +309,10 @@ def dashboard(request):
     return render(request, "dashboard.html", {"tasks": tasks})
 
 
+from django.shortcuts import render, redirect
+from .forms import TaskForm  # Import your TaskForm
+
+
 def create_task(request):
     form = TaskForm()  # Create an instance of the form
 
@@ -320,19 +326,19 @@ def create_task(request):
 
 
 def create_team(request):
+    # Fetch all teams and print their values for debugging
     myteams = Team.objects.all().values()
     print(myteams)
+
     if request.method == "POST":
         form = TeamCreationForm(request.POST)
         if form.is_valid():
-            team = form.save(request.user)
-            return redirect(
-                "team_management"
-            )  # Create a URL for team_management page to redirect.
+            team = form.save(user=request.user, commit=True)
+            return redirect("team_management")
     else:
         form = TeamCreationForm()
-    return render(request, "create_team.html", {"form": form})
 
+    return render(request, "create_team.html", {"form": form})
 
 def leave_team(request, user_id, team_id):
     team = Team.objects.get(id=team_id)
@@ -348,3 +354,163 @@ def team_search(request):
         | Team.objects.filter(users_in_team=request.user.id)
     ).distinct()
     return render(request, "team_management.html", {"myteams": myteams})
+
+
+def delete_task(request, task_id):
+    task = Task.objects.get(id=task_id)
+    if request.method == "POST":
+        task.delete()
+        return redirect("dashboard")
+    return render(request, "dashboard.html", {"task": task})
+
+
+def edit_task(request, task_id):
+    task = Task.objects.get(id=task_id)
+    if request.method == "POST":
+        form = EditTaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    else:
+        form = EditTaskForm(instance=task)
+
+    return render(request, "edit_task.html", {"form": form, "task": task})
+
+
+def show_task_details(request, task_id):
+    task = Task.objects.get(id=task_id)
+    return render(request, "show_task.html", {"task": task})
+
+
+def update_task_status(request, task_id):
+    task = Task.objects.get(id=task_id)
+    if request.method == "POST":
+        new_status = request.POST.get("new_status")
+        if new_status == "Completed":
+            task.task_complete = True
+            task.completion_time = timezone.now()
+        else:
+            task.task_complete = False
+            task.completion_time = None
+        task.status = new_status
+        task.save()
+
+        return redirect("dashboard")
+
+    return render(request, "update_task_status.html", {"task": task})
+
+
+def update_complete_status(request, task_id):
+    task = Task.objects.get(id=task_id)
+    if request.method == "POST":
+        new_status = request.POST.get("new_status")
+        if new_status == "Completed" and not task.task_complete:
+            task.task_complete = True
+            task.completion_time = timezone.now()
+        elif new_status != "Completed" and task.task_complete:
+            task.task_complete = False
+            task.completion_time = None
+        task.save()
+        return redirect("dashboard")
+    return render(request, "dashboard.html", {"task": task})
+
+
+def edit_team(request, team_id):
+    team = Team.objects.get(id=team_id)
+    if team.team_owner != request.user:
+        messages.error(request, "Sorry, you do not have permission to edit this team.")
+        return redirect("team_management")
+
+    if request.method == "POST":
+        form = EditTeamForm(request.POST, instance=team)
+        if form.is_valid():
+            new_owner = form.cleaned_data["team_owner"]
+            original_owner = team.team_owner
+            team.team_owner = new_owner
+            team.save()
+            team.users_in_team.add(original_owner)
+            return redirect("team_management")
+    else:
+        form = EditTeamForm(instance=team)
+
+    return render(request, "edit_team.html", {"form": form, "team": team})
+
+
+def leave_team(request, team_id):
+    team = Team.objects.get(id=team_id)
+
+    if request.user in team.users_in_team.all():
+        team.users_in_team.remove(request.user)
+        messages.success(request, "You have left the team successfully.")
+    else:
+        messages.error(request, "You are not a member of this team.")
+
+    return redirect("team_management")
+
+
+def team_delete(request, team_id):
+    team = Team.objects.get(id=team_id)
+    if request.method == "POST":
+        team.delete()
+        return redirect("team_management")
+    return render(request, "team_management.html", {"team": team})
+
+
+def high_priority_tasks(request):
+    user_logged_in = request.user
+
+    all_high_priority_tasks = Task.objects.filter(priority="High")
+    high_priority_tasks = []
+
+    for task in all_high_priority_tasks:
+        if (
+            user_logged_in in task.user_assigned.all()
+            or user_logged_in == task.task_owner
+        ):
+            high_priority_tasks.append(task)
+
+    return render(request, "high_priority_tasks.html", {"tasks": high_priority_tasks})
+
+
+def medium_priority_tasks(request):
+    user_logged_in = request.user
+
+    all_medium_priority_tasks = Task.objects.filter(priority="Medium")
+    medium_priority_tasks = []
+
+    for task in all_medium_priority_tasks:
+        if (
+            user_logged_in in task.user_assigned.all()
+            or user_logged_in == task.task_owner
+        ):
+            medium_priority_tasks.append(task)
+
+    return render(
+        request, "medium_priority_tasks.html", {"tasks": medium_priority_tasks}
+    )
+
+
+def low_priority_tasks(request):
+    user_logged_in = request.user
+
+    all_low_priority_tasks = Task.objects.filter(priority="Low")
+    low_priority_tasks = []
+
+    for task in all_low_priority_tasks:
+        if (
+            user_logged_in in task.user_assigned.all()
+            or user_logged_in == task.task_owner
+        ):
+            low_priority_tasks.append(task)
+
+    return render(request, "low_priority_tasks.html", {"tasks": low_priority_tasks})
+
+
+def add_comment(request, task_id):
+    if request.method == "POST":
+        task = Task.objects.get(id=task_id)
+        comment_text = request.POST.get("comment")
+        Comment.objects.create(task=task, text=comment_text)
+        return redirect(request.META["HTTP_REFERER"])
+    else:
+        pass

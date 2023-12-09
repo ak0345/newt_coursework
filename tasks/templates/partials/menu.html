@@ -17,7 +17,7 @@
             type="text"
             class="form-control"
             id="input_everything_name"
-            placeholder="Search for a #team, task, or @username here (case sensitive)"
+            placeholder="Search for a #team, task, or @username here"
             aria-label="Search Everything"
             aria-describedby="basic-addon1"
             name="everythingsearched"
@@ -38,7 +38,11 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
+      {% if user.gravatar_url != null %}
+        <img src="{{ user.gravatar }}" alt="User's Gravatar" class="rounded mx-auto d-block" >
+        {% else %}
         <span class="bi-person-circle"></span>
+        {% endif %}
       </a>
       <ul
         class="dropdown-menu dropdown-menu-end"
@@ -47,15 +51,9 @@
         <li>
           <a class="dropdown-item" href="{% url 'profile' %}">Change profile</a>
         </li>
-
         <li>
           <a class="dropdown-item" href="{% url 'password' %}"
             >Change password</a
-          >
-        </li>
-        <li>
-          <a class="dropdown-item" href="{% url 'notifications' %}"
-            >Notifications</a
           >
         </li>
         <li><hr class="dropdown-divider" /></li>

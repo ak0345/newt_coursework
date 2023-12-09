@@ -4,7 +4,8 @@
     <div class="col-12">
       <h3 class="mb-4">Sign up</h3>
       <form action="{% url 'sign_up' %}" method="post">
-        {% csrf_token %} {% include 'partials/bootstrap_form.html' with form=form %}
+        {% csrf_token %} {% include 'partials/bootstrap_form.html' with
+        form=form %}
         <input type="submit" value="Sign up" class="btn btn-outline-dark" />
       </form>
     </div>

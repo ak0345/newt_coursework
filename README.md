@@ -50,3 +50,5 @@ $ python3 manage.py test
 The packages used by this application are specified in `requirements.txt`
 
 For highlighting the search result matches in yellow: https://medium.com/geekculture/how-to-highlight-a-keyword-inside-a-text-in-a-django-search-6a8e33cc8496
+
+Home page graphics: https://undraw.co/
