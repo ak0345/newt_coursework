@@ -322,6 +322,7 @@ def dashboard(request):
         'show_oldest_first': True,
         'show_low_priority_first': False,
         'show_not_started_first': False,
+        'simplified_view': False,
     })
     
     all_teams = Team.objects.all()
@@ -360,6 +361,9 @@ def dashboard(request):
             display_tasks_settings['show_not_started_first'] = True
             display_tasks_settings['show_low_priority_first'] = False
             display_tasks_settings['show_oldest_first'] = False
+
+        if option_picked == "toggle_simplified":
+            display_tasks_settings['simplified_view'] = not display_tasks_settings['simplified_view']
 
     if display_tasks_settings['show_not_started_first']:
         status_order = Case(
