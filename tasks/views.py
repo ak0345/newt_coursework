@@ -312,8 +312,9 @@ def invite_user(request, team_id, inviting_id):
 @login_required
 def dashboard(request):
     tasks = Task.objects.filter(task_owner=request.user)
+    all_teams = Team.objects.all
 
-    return render(request, "dashboard.html", {"tasks": tasks})
+    return render(request, "dashboard.html", {"tasks": tasks, "all_teams": all_teams})
 
 
 from django.shortcuts import render, redirect
