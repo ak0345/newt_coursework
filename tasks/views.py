@@ -62,6 +62,12 @@ def lookup_team(request):
     else:
         return render(request, "team_search.html", {})
 
+def notifications(request):
+    mynotifications = Invitation.objects.all()
+    return render(request, "notifications.html", {"mynotifications": mynotifications})
+
+
+
 
 @login_prohibited
 def home(request):

@@ -72,8 +72,10 @@ class TaskForm(forms.ModelForm):
         ]
 
     def save(self, user, commit=True):
+
         new_task = super(TaskForm, self).save(commit=False)
         new_task.task_owner = user
+
         new_task.save()
 
         new_task.user_assigned.set(self.cleaned_data["user_assigned"])
