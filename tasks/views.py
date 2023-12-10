@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
+from django.db.models import Case, Value, When
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -62,11 +63,10 @@ def lookup_team(request):
     else:
         return render(request, "team_search.html", {})
 
+
 def notifications(request):
     mynotifications = Invitation.objects.all()
     return render(request, "notifications.html", {"mynotifications": mynotifications})
-
-
 
 
 @login_prohibited
@@ -87,6 +87,7 @@ def show_team(request, team_id):
         return redirect("team_management")
     else:
         return render(request, "show_team.html", {"team": team})
+
 
 @login_required
 def create_invitation(request, user_id, team_id):
@@ -141,6 +142,7 @@ def reject_invitation(request, notification_id):
         request, f"Rejected user {user.username} from joining team {team.team_name}."
     )
     return redirect("notifications")
+
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
@@ -310,9 +312,93 @@ def invite_user(request, team_id, inviting_id):
 
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(task_owner=request.user)
+    display_tasks_settings = request.session.get('display_tasks_settings', {
+        'show_low': True,
+        'show_medium': True,
+        'show_high': True,
+        'show_not_started': True,
+        'show_in_progress': True,
+        'show_completed': True,
+        'show_oldest_first': True,
+        'show_low_priority_first': False,
+        'show_not_started_first': False,
+        'simplified_view': False,
+    })
+    
+    all_teams = Team.objects.all()
 
-    return render(request, "dashboard.html", {"tasks": tasks})
+    if request.method == "POST":
+        option_picked = request.POST.get("filter_tasks")
+        if option_picked == "toggle_low_priority":
+            display_tasks_settings['show_low'] = not display_tasks_settings['show_low']
+        
+        if option_picked == "toggle_medium_priority":
+            display_tasks_settings['show_medium'] = not display_tasks_settings['show_medium']
+        
+        if option_picked == "toggle_high_priority":
+            display_tasks_settings['show_high'] = not display_tasks_settings['show_high']
+        
+        if option_picked == "toggle_not_started":
+            display_tasks_settings['show_not_started'] = not display_tasks_settings['show_not_started']
+        
+        if option_picked == "toggle_in_progress":
+            display_tasks_settings['show_in_progress'] = not display_tasks_settings['show_in_progress']
+        
+        if option_picked == "toggle_completed":
+            display_tasks_settings['show_completed'] = not display_tasks_settings['show_completed']
+
+        if option_picked == "toggle_date" and display_tasks_settings['show_oldest_first'] != True:
+            display_tasks_settings['show_oldest_first'] = True
+            display_tasks_settings['show_low_priority_first'] = False
+            display_tasks_settings['show_not_started_first'] = False
+        
+        if option_picked == "toggle_priority" and display_tasks_settings['show_low_priority_first'] != True:
+            display_tasks_settings['show_low_priority_first'] = True
+            display_tasks_settings['show_not_started_first'] = False
+            display_tasks_settings['show_oldest_first'] = False
+        
+        if option_picked == "toggle_status" and display_tasks_settings['show_not_started_first'] != True:
+            display_tasks_settings['show_not_started_first'] = True
+            display_tasks_settings['show_low_priority_first'] = False
+            display_tasks_settings['show_oldest_first'] = False
+
+        if option_picked == "toggle_simplified":
+            display_tasks_settings['simplified_view'] = not display_tasks_settings['simplified_view']
+
+    if display_tasks_settings['show_not_started_first']:
+        status_order = Case(
+        When(status="Not Started", then=Value(1)),
+        When(status="In Progress", then=Value(2)),
+        When(status="Completed", then=Value(3)),
+        )
+        tasks = Task.objects.alias(status_order=status_order).order_by("status_order", "status")
+    if display_tasks_settings['show_low_priority_first']:
+        priority_order = Case(
+        When(priority="High", then=Value(1)),
+        When(priority="Medium", then=Value(2)),
+        When(priority="Low", then=Value(3)),
+        )
+        tasks = Task.objects.alias(priority_order=priority_order).order_by("priority_order", "priority")
+    if display_tasks_settings['show_oldest_first']:
+        tasks = Task.objects.filter(task_owner=request.user).order_by('creation_date')
+        
+    
+    if display_tasks_settings['show_low'] == False:
+            tasks = tasks.exclude(priority="Low")
+    if display_tasks_settings['show_medium'] == False:
+            tasks = tasks.exclude(priority="Medium")
+    if display_tasks_settings['show_high'] == False:
+            tasks = tasks.exclude(priority="High")
+    if display_tasks_settings['show_not_started'] == False:
+            tasks = tasks.exclude(status="Not Started")
+    if display_tasks_settings['show_in_progress'] == False:
+            tasks = tasks.exclude(status="In Progress")
+    if display_tasks_settings['show_completed'] == False:
+            tasks = tasks.exclude(status="Completed")
+
+    request.session['display_tasks_settings'] = display_tasks_settings
+
+    return render(request, "dashboard.html", {"tasks": tasks, "all_teams": all_teams, "display_tasks_settings": display_tasks_settings})
 
 
 from django.shortcuts import render, redirect
@@ -321,7 +407,9 @@ from .forms import TaskForm  # Import your TaskForm
 
 def create_task(request):
     form = TaskForm()  # Create an instance of the form
-    form.set_team_assigned_queryset(request.user)  # Filter team_assigned queryset for the current user
+    form.set_team_assigned_queryset(
+        request.user
+    )  # Filter team_assigned queryset for the current user
 
     if request.method == "POST":
         form = TaskForm(request.POST)
@@ -346,6 +434,7 @@ def create_team(request):
         form = TeamCreationForm()
 
     return render(request, "create_team.html", {"form": form})
+
 
 def leave_team(request, user_id, team_id):
     team = Team.objects.get(id=team_id)
@@ -401,7 +490,6 @@ def update_task_status(request, task_id):
             task.completion_time = None
         task.status = new_status
         task.save()
-
         return redirect("dashboard")
 
     return render(request, "update_task_status.html", {"task": task})
@@ -517,4 +605,3 @@ def add_comment(request, task_id):
         return redirect(request.META["HTTP_REFERER"])
     else:
         pass
-

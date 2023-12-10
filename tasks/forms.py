@@ -68,13 +68,15 @@ class TaskForm(forms.ModelForm):
             "team_assigned",
             "deadline_date",
             "task_complete",
-            "sub_tasks"
+            "sub_tasks",
+            "priority"
         ]
 
     def save(self, user, commit=True):
 
         new_task = super(TaskForm, self).save(commit=False)
         new_task.task_owner = user
+
 
         new_task.save()
 

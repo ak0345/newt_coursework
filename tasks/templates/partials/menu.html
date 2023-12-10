@@ -30,25 +30,29 @@
 
   <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
     <li class="nav-item dropdown">
-      <a
-        class="nav-link"
-        href="#"
-        id="user-account-dropdown"
-        role="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        {% if user.gravatar_url != null %}
-        <img
-          src="{{ user.gravatar }}"
-          alt="User's Gravatar"
-          class="rounded-circle mx-auto d-block"
-          width="24rem"
-        />
-        {% else %}
-        <span class="bi-person-circle"></span>
-        {% endif %}
-      </a>
+      <div class="row">
+        <a
+          class="nav-link"
+          href="#"
+          id="user-account-dropdown"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          {% if user.gravatar_url != null %}
+          <img
+            src="{{ user.gravatar }}"
+            alt="User's Gravatar"
+            class="rounded-circle mx-auto d-block"
+            width="24rem"
+          />
+          {% else %}
+          <span class="bi-person-circle"></span>
+          {% endif %}
+          <span>{{ user.username }}</span>
+        </a>
+      </div>
+
       <ul
         class="dropdown-menu dropdown-menu-end"
         aria-labelledby="user-account-dropdown"
