@@ -12,9 +12,11 @@ from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
 from .models import Task
+from .models import Invitation
 from .forms import TaskForm
 from .forms import EditTaskForm
 from .forms import EditTeamForm
+from .forms import InvitationForm
 from django.http import HttpResponseForbidden
 from .forms import TeamCreationForm
 from .forms import TeamSearchForm
@@ -313,6 +315,7 @@ from .forms import TaskForm  # Import your TaskForm
 
 def create_task(request):
     form = TaskForm()  # Create an instance of the form
+    form.set_team_assigned_queryset(request.user)  # Filter team_assigned queryset for the current user
 
     if request.method == "POST":
         form = TaskForm(request.POST)
@@ -422,11 +425,7 @@ def edit_team(request, team_id):
     if request.method == "POST":
         form = EditTeamForm(request.POST, instance=team)
         if form.is_valid():
-            new_owner = form.cleaned_data["team_owner"]
-            original_owner = team.team_owner
-            team.team_owner = new_owner
             team.save()
-            team.users_in_team.add(original_owner)
             return redirect("team_management")
     else:
         form = EditTeamForm(instance=team)
@@ -512,3 +511,4 @@ def add_comment(request, task_id):
         return redirect(request.META["HTTP_REFERER"])
     else:
         pass
+

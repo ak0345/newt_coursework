@@ -22,6 +22,7 @@ class User(AbstractUser):
     )
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
+    gravatar_url = models.URLField(max_length=255, blank=True, null=True)
     email = models.EmailField(unique=True, blank=False)
     owned_tasks = models.ManyToManyField("Task", blank=True, related_name="task_owners")
     owned_teams = models.ManyToManyField("Team", blank=True, related_name="team_owners")
@@ -47,6 +48,10 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
 
         return self.gravatar(size=60)
+
+def validate_future_date(value):
+    if value < timezone.now():
+        raise ValidationError("The date cannot be in the past.")
 
 
 class Task(models.Model):
@@ -126,6 +131,9 @@ class Task(models.Model):
         (LOW, "Low"),
     ]
 
+    def __str__(self):
+        return self.task_heading
+
 
 class Team(models.Model):
     team_name = models.CharField(max_length=100, unique=True, blank=False)
@@ -155,11 +163,16 @@ class Team(models.Model):
         ],
     )
 
+    def __str__(self):
+        return self.team_name
+
 
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    Commentor = models.ForeignKey(User, on_delete=models.CASCADE , default = 1)  # New field for the commenter
+
 
     def comment_description(self):
         return f"Comment on {self.task.task_heading}"
