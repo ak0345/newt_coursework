@@ -16,45 +16,75 @@
       </a>
     </div>
   </div>
-  <div class="row justify-content-end">
-    <div class="col-sm-auto">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="dropdown">
-          <button
-            class="btn btn-sm btn-outline-dark dropdown-toggle"
-            type="button"
-            id="priorityDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            Filter by Priority
-          </button>
-          <ul
-            class="dropdown-menu dropdown-menu-end"
-            aria-labelledby="priorityDropdown"
-          >
-            <li>
-              <a class="dropdown-item" href="{% url 'high_priority_tasks' %}"
-                >High Priority</a
-              >
-            </li>
-            <li>
-              <a class="dropdown-item" href="{% url 'medium_priority_tasks' %}"
-                >Medium Priority</a
-              >
-            </li>
-            <li>
-              <a class="dropdown-item" href="{% url 'low_priority_tasks' %}"
-                >Low Priority</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+  
+  <div class="row justify-content-end text-center px-0 mx-0">
+    <form class="col-auto px-0 text-center" method="post" action="{% url 'dashboard' %}">
+        {% csrf_token %}
+        <button class="disabled btn btn-sm" style="width: 2rem;"><i class="bi bi-eye-fill"></i></button>
+        
+        <button name="filter_tasks" value="toggle_low_priority" type="submit" 
+        {% if display_tasks_settings.show_low == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}
+        style="width: 2rem;">!</button>
+        <button name="filter_tasks" value="toggle_medium_priority" type="submit" 
+        {% if display_tasks_settings.show_medium == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}
+        style="width: 2rem;">!!</button>
+        <button name="filter_tasks" value="toggle_high_priority" type="submit" 
+        {% if display_tasks_settings.show_high == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}
+        style="width: 2rem;">!!!</button>
+        <button name="filter_tasks" value="toggle_not_started" type="submit" 
+        {% if display_tasks_settings.show_not_started == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}>Not Started</button>
+        <button name="filter_tasks" value="toggle_in_progress" type="submit" 
+        {% if display_tasks_settings.show_in_progress == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}>In Progress</button>
+        <button name="filter_tasks" value="toggle_completed" type="submit" 
+        {% if display_tasks_settings.show_completed == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}>Completed</button>
+        
+        <button type="submit" class="disabled btn btn-sm" style="width: 2rem;"><i class="bi bi-sort-down-alt"></i></button>
+        <button name="filter_tasks" value="toggle_date" type="submit" 
+        {% if display_tasks_settings.show_oldest_first == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}>Date (Oldest first)</button>
+        <button name="filter_tasks" value="toggle_priority" type="submit" 
+        {% if display_tasks_settings.show_low_priority_first == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}>Priority (High first)</button>
+        <button name="filter_tasks" value="toggle_status" type="submit" 
+        {% if display_tasks_settings.show_not_started_first == False %}
+        class="btn btn-sm btn-outline-dark"
+        {% else %}
+        class="btn btn-sm btn-dark"
+        {% endif %}>Status (Not Started first)</button>
+    </form>
   </div>
 </div>
-<div class="position-relative flex-nowrap row overflow-auto mt-4 m-0 gx-5 px-3 scrollable-content" >
+<div class="position-relative flex-nowrap row overflow-auto mt-4 m-0 gx-5 px-5 scrollable-content" >
     {% for team in all_teams %}
           {% if user == team.team_owner or user in team.users_in_team.all %}
           <div class="col-4 ">
@@ -86,7 +116,7 @@
                           action="{% url 'update_task_status' task.id %}"
                         >
                           {% csrf_token %}
-                          {% if task.status != 'In Progress' and task.status != 'Complete' %}
+                          {% if task.status != 'In Progress' and task.status != 'Completed' %}
                           <button
                           {% if task.status == 'Not Started' %}
                             class="border border-danger rounded bg-danger"
@@ -128,18 +158,18 @@
                             ></i>
                           </button>
                           <button
-                          {% if task.status == 'Complete' %}
+                          {% if task.status == 'Completed' %}
                           class="border border-success rounded bg-success"
                           {% else %}
                           class="border border-success rounded bg-dark"
                           {% endif %}
                             type="submit"
                             name="new_status"
-                            value="Complete"
+                            value="Completed"
                           >
                             <option style="display: none" value="Complete"></option>
                             <i 
-                            {% if task.status == 'Complete' %}
+                            {% if task.status == 'Completed' %}
                             class="bi bi-hourglass-bottom text-light"
                             {% else %}
                             class="bi bi-hourglass-bottom text-success"
@@ -150,18 +180,18 @@
                         </div>
                         <div class="text-end mt-1">
                           {% if task.priority == 'High' %}
-                          <span class="badge badge-pill badge-danger bg-danger">High Priority</span>
+                          <span class="badge badge-pill badge-danger bg-danger">!!! High Priority</span>
                           {% elif task.priority == 'Medium' %}
-                          <span class="badge badge-pill badge-warning bg-warning">Medium Priority</span>
+                          <span class="badge badge-pill badge-warning bg-warning">!! Medium Priority</span>
                           {% elif task.priority == 'Low' %}
-                          <span class="badge badge-pill badge-success bg-success">Low Priority</span>
+                          <span class="badge badge-pill badge-success bg-success">! Low Priority</span>
                           {% endif %}
                           {% if task.status == 'Not Started' %}
                           <span class="badge badge-pill badge-danger bg-danger">Not Started</span>
                           {% elif task.status == 'In Progress' %}
                           <span class="badge badge-pill badge-warning bg-warning">In Progress</span>
-                          {% elif task.status == 'Complete' %}
-                          <span class="badge badge-pill badge-success bg-success">Complete</span>
+                          {% elif task.status == 'Completed' %}
+                          <span class="badge badge-pill badge-success bg-success">Completed</span>
                           {% endif %}
                       </div>
                       </div>
