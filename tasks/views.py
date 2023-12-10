@@ -62,11 +62,10 @@ def lookup_team(request):
     else:
         return render(request, "team_search.html", {})
 
+
 def notifications(request):
     mynotifications = Invitation.objects.all()
     return render(request, "notifications.html", {"mynotifications": mynotifications})
-
-
 
 
 @login_prohibited
@@ -87,6 +86,7 @@ def show_team(request, team_id):
         return redirect("team_management")
     else:
         return render(request, "show_team.html", {"team": team})
+
 
 @login_required
 def create_invitation(request, user_id, team_id):
@@ -141,6 +141,7 @@ def reject_invitation(request, notification_id):
         request, f"Rejected user {user.username} from joining team {team.team_name}."
     )
     return redirect("notifications")
+
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
@@ -321,7 +322,9 @@ from .forms import TaskForm  # Import your TaskForm
 
 def create_task(request):
     form = TaskForm()  # Create an instance of the form
-    form.set_team_assigned_queryset(request.user)  # Filter team_assigned queryset for the current user
+    form.set_team_assigned_queryset(
+        request.user
+    )  # Filter team_assigned queryset for the current user
 
     if request.method == "POST":
         form = TaskForm(request.POST)
@@ -346,6 +349,7 @@ def create_team(request):
         form = TeamCreationForm()
 
     return render(request, "create_team.html", {"form": form})
+
 
 def leave_team(request, user_id, team_id):
     team = Team.objects.get(id=team_id)
@@ -517,4 +521,3 @@ def add_comment(request, task_id):
         return redirect(request.META["HTTP_REFERER"])
     else:
         pass
-

@@ -1,71 +1,179 @@
-{% extends 'base_content.html' %}
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <h3>Welcome to your dashboard, {{ user.first_name }}</h3>
-            <h5 class="text-muted">Logged in as {{ user.username }}</h5>
-        </div>
+{% extends 'base_content.html' %} {% block content %}
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-sm">
+      <h3>Welcome to your dashboard, {{ user.first_name }}</h3>
+      <h5 class="text-muted mb-4">Logged in as {{ user.username }}</h5>
     </div>
-    
-    <h2 class="mt-4 mb-3">Task Dashboard</h2>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href='{% url 'create_task' %}' class="btn btn-lg btn-primary">
-            Create Task
-        </a>
-
+    <div class="col-sm-auto">
+      <a href="{% url 'create_task' %}">
+        <button type="button" class="btn btn-success">+ Create Task</button>
+      </a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-auto">
+      <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="dropdown">
-            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="priorityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                Filter by Priority
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="priorityDropdown">
-                <li><a class="dropdown-item" href="{% url 'high_priority_tasks' %}">High Priority</a></li>
-                <li><a class="dropdown-item" href="{% url 'medium_priority_tasks' %}">Medium Priority</a></li>
-                <li><a class="dropdown-item" href="{% url 'low_priority_tasks' %}">Low Priority</a></li>
-            </ul>
+          <button
+            class="btn btn-sm btn-outline-dark dropdown-toggle"
+            type="button"
+            id="priorityDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Filter by Priority
+          </button>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="priorityDropdown"
+          >
+            <li>
+              <a class="dropdown-item" href="{% url 'high_priority_tasks' %}"
+                >High Priority</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'medium_priority_tasks' %}"
+                >Medium Priority</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'low_priority_tasks' %}"
+                >Low Priority</a
+              >
+            </li>
+          </ul>
         </div>
+      </div>
     </div>
+  </div>
 
-    <ul class="list-group">
-        {% for task in tasks %}
-        <li class="list-group-item">
-            <div>
-                <h5 class="mb-1"><a href="{% url 'show_task' task.id %}" style="text-decoration: none; color: blue;">{{ task.task_heading }}</a></h5>
-                <p class="mb-1">{{ task.task_description }}</p>
-                <small class="text-muted">
-                    <strong>Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }} |
-                    <strong>Owner:</strong> {{ task.task_owner.username }} |
-                    <strong>Created:</strong> {{ task.creation_date }} |
-                    <strong>Deadline:</strong> {{ task.deadline_date }} |
-                    <strong>Complete:</strong> {{ task.task_complete }}
-                </small>
-                <form class="mt-2" method="post" action="{% url 'update_task_status' task.id %}">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <select class="form-select me-2" name="new_status">
-                            <option value="Not Started" {% if task.status == 'Not Started' %} selected {% endif %}>Not Started</option>
-                            <option value="In Progress" {% if task.status == 'In Progress' %} selected {% endif %}>In Progress</option>
-                            <option value="Completed" {% if task.status == 'Completed' %} selected {% endif %}>Completed</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
+  <div class="row g-sm-5 gy-2">
+    {% for task in tasks %}
+    <div class="col-4">
+        <div class="row border rounded">
+            <div class="bg-dark rounded-top px-3 py-2">
+                <div class="row">
+                    <div class="col align-self-center">
+                        <h6 class="mb-1">
+                          <a
+                            href="{% url 'show_task' task.id %}"
+                            class="text-light text-break"
+                            style="text-decoration: none"
+                            >{{ task.task_heading }}</a
+                          >
+                        </h6>
+                        <small class="text-light"><strong>Owner:&nbsp;</strong>{{ task.task_owner.username }}</small>
+                      </div>
+                      <div class="col-auto text-end">
+                        <div class="row">
+                          <form
+                          class=""
+                          method="post"
+                          action="{% url 'update_task_status' task.id %}"
+                        >
+                          {% csrf_token %}
+                          {% if task.status != 'In Progress' and task.status != 'Complete' %}
+                          <button
+                          {% if task.status == 'Not Started' %}
+                            class="border border-danger rounded bg-danger"
+                          {% else %}
+                            class="border border-danger rounded bg-dark"
+                          {% endif %}
+                            type="submit"
+                            name="new_status"
+                            value="Not Started"
+                          >
+                            <option style="display: none" value="Not Started"></option>
+                            <i 
+                            {% if task.status == 'Not Started' %}
+                            class="bi bi-hourglass text-light"
+                            {% else %}
+                            class="bi bi-hourglass text-danger"
+                            {% endif %}
+                            >
+                          </i>
+                          </button>
+                          {% endif %}
+                          <button
+                          {% if task.status == 'In Progress' %}
+                          class="border border-warning rounded bg-warning"
+                          {% else %}
+                          class="border border-warning rounded bg-dark"
+                          {% endif %}
+                            type="submit"
+                            name="new_status"
+                            value="In Progress"
+                          >
+                            <option style="display: none" value="In Progress"></option>
+                            <i 
+                            {% if task.status == 'In Progress' %}
+                            class="bi bi-hourglass-split text-light"
+                            {% else %}
+                            class="bi bi-hourglass-split text-warning"
+                            {% endif %}
+                            ></i>
+                          </button>
+                          <button
+                          {% if task.status == 'Complete' %}
+                          class="border border-success rounded bg-success"
+                          {% else %}
+                          class="border border-success rounded bg-dark"
+                          {% endif %}
+                            type="submit"
+                            name="new_status"
+                            value="Complete"
+                          >
+                            <option style="display: none" value="Complete"></option>
+                            <i 
+                            {% if task.status == 'Complete' %}
+                            class="bi bi-hourglass-bottom text-light"
+                            {% else %}
+                            class="bi bi-hourglass-bottom text-success"
+                            {% endif %}
+                            ></i>
+                          </button>
+                        </form>
+                        </div>
+                        <div class="text-end mt-1">
+                          {% if task.status == 'Not Started' %}
+                          <span class="badge badge-pill badge-danger bg-danger">Not Started</span>
+                          {% elif task.status == 'In Progress' %}
+                          <span class="badge badge-pill badge-warning bg-warning">In Progress</span>
+                          {% elif task.status == 'Complete' %}
+                          <span class="badge badge-pill badge-success bg-success">Complete</span>
+                          {% endif %}
+                      </div>
+                      </div>
                     </div>
-                </form>
-                {% if task.status == 'In Progress' %}
-                    <small class="text-muted">Status: In Progress</small>
-                    {% if task.running_time %}
-                        <small class="text-muted">Running Time: {{ task.running_time }}</small>
-                    {% endif %}
-                {% elif task.status == 'Completed' %}
-                    <small class="text-muted">Status: Completed</small>
-                    {% if task.completion_time %}
-                        <small class="text-muted">Completion Time: {{ task.completion_time }}</small>
-                    {% endif %}
-                {% else %}
-                    <small class="text-muted">Status: Not Started</small>
-                {% endif %}
+                </div>
+            <div class="row">
+              <p class="mt-2">{{ task.task_description }}</p>
+              <small class="text-muted">
+                <strong>Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }} |
+                <strong>Created:</strong> {{ task.creation_date }} |
+                <strong>Deadline:</strong> {{ task.deadline_date }} |
+                <strong>Complete:</strong> {{ task.task_complete }}
+              </small>
+      
+              {% if task.status == 'In Progress' %}
+              <small class="text-muted">Status: In Progress</small>
+              {% if task.running_time %}
+              <small class="text-muted">Running Time: {{ task.running_time }}</small>
+              {% endif %} {% elif task.status == 'Completed' %}
+              <small class="text-muted">Status: Completed</small>
+              {% if task.completion_time %}
+              <small class="text-muted"
+                >Completion Time: {{ task.completion_time }}</small
+              >
+              {% endif %} {% else %}
+              <small class="text-muted">Status: Not Started</small>
+              {% endif %}
             </div>
-        </li>
-        {% endfor %}
-    </ul>
+          </div>
+    </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
