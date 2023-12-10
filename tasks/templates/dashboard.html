@@ -1,5 +1,5 @@
 {% extends 'base_content.html' %} {% block content %}
-<div class="container mt-5 overflow-hidden">
+<div class="container-fluid px-5 mt-5 overflow-hidden">
     <style>
         .scrollable-content::-webkit-scrollbar {
             display: none;
@@ -84,17 +84,17 @@
     </form>
   </div>
 </div>
-<div class="position-relative flex-nowrap row overflow-auto mt-4 m-0 gx-5 px-5 scrollable-content" >
+<div class="position-relative flex-nowrap row overflow-auto mt-5 m-0 gx-5 px-5 scrollable-content" >
     {% for team in all_teams %}
           {% if user == team.team_owner or user in team.users_in_team.all %}
           <div class="col-4 ">
-            <div class="row rounded px-3 text-light py-2" style="background-color: #141618;"><h4 class="mt-2">&nbsp;<strong>{{ team.team_name }}</strong></h4></div>
+            <div class="col-12 rounded px-3 text-light py-2" style="background-color: #141618;"><h4 class="mt-2">&nbsp;<strong>{{ team.team_name }}</strong></h4></div>
             <div class="row justify-content-center py-4">
                 {% for task in tasks %}
                 {% if task.team_assigned == team %}
     <div class="row mb-3 mx-0 justify-content-center">
-        <div class="row border rounded px-0 ">
-            <div class="rounded-top px-3 py-2 bg-dark">
+        <div class="row border rounded px-0 mx-0 ">
+            <div class="rounded-top px-3 py-2 bg-dark m-0">
                 <div class="row">
                     <div class="col align-self-center">
                         
@@ -106,7 +106,7 @@
                             ><strong>{{ task.task_heading }}</strong></a
                           >
                         </h6>
-                        <small class="text-light"><strong>Owner:&nbsp;</strong>{{ task.task_owner.username }}</small>
+                        <small class="text-light"><strong>Created:&nbsp;</strong>{{ task.creation_date }}</small>
                       </div>
                       <div class="col-auto text-end">
                         <div class="row">
@@ -197,32 +197,39 @@
                       </div>
                     </div>
                 </div>
-            <div class="row">
-              <p class="mt-2">{{ task.task_description }}</p>
-              <small class="text-muted">
-                <strong>Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }} |
-                <strong>Created:</strong> {{ task.creation_date }} |
-                <strong>Deadline:</strong> {{ task.deadline_date }} |
-                <strong>Complete:</strong> {{ task.task_complete }}
+            <div class="p-0">
+              <p class="mt-2 px-2">{{ task.task_description }}</p>
+              <small class="text-muted mt-0 p-2 ">
+                <strong class="">Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }}
               </small>
-      
+              
+              <div 
               {% if task.status == 'In Progress' %}
-              <small class="text-muted">Status: In Progress</small>
+              class="rounded-bottom mt-2 py-1 row m-0 p-0 bg-warning"><small>
+                {% load tz %}
+                {% with current_time=now|timezone:"UTC" %}
+                {% with deadline_time=task.deadline_date|timezone:"UTC" %}
+                {% with time_difference=deadline_time|timeuntil:current_time %}
+                Time remaining: {{ time_difference }}
+                {% endwith %}
+                {% endwith %}
+                {% endwith %}
+                </small>
                 {% if task.running_time %}
                 <small class="text-muted">Running Time: {{ task.running_time }}</small>
                 {% endif %} 
               {% elif task.status == 'Completed' %}
-                <small class="text-muted">Status: Completed</small>
-                {% if task.completion_time %}
-                <small class="text-muted"
-                    >Completion Time: {{ task.completion_time }}</small
-                >
-                {% endif %} 
+              {% if task.completion_time <= task.deadline_date %}
+              class="rounded-bottom py-1 row m-0 p-0 mt-2 text-light bg-success"><small>Finished on time:&nbsp;{{ task.completion_time }}</small>
+              {% else %}
+              class="rounded-bottom py-1 row m-0 p-0 mt-2 text-light bg-danger"><small>Finished late:&nbsp;{{ task.completion_time }}</small>
+              {% endif %}
               {% elif task.status == 'Not Started' %}
-              <small class="text-muted">Status: Not Started</small>
+              class="rounded-bottom py-1 row m-0 p-0 mt-2 bg-light border-top"><small>Deadline:&nbsp;{{ task.deadline_date }}</small>
               {% endif %}
             </div>
-          </div>
+            </div>
+        </div>
     </div>
     {% endif %}
     {% endfor %}
