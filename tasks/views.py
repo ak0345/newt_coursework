@@ -283,6 +283,8 @@ def invite_user(request, team_id, inviting_id):
             "User does not exist.",
         )
         return redirect(request.META["HTTP_REFERER"])
+        if not redirect_url:
+            redirect_url = resolve_url('fallback_view_name')
 
     form = InvitationForm()
     user = User.objects.get(username=username)
@@ -297,6 +299,8 @@ def invite_user(request, team_id, inviting_id):
                 "Request already exists. Awaiting approval from team owner or user's notifications.",
             )
         return redirect(request.META["HTTP_REFERER"])
+        if not redirect_url:
+            redirect_url = resolve_url('fallback_view_name')
 
     form.save(
         user=user,

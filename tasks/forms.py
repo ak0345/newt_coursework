@@ -23,13 +23,17 @@ class InvitationForm(forms.ModelForm):
 
     def save(self, user, team, inviting, commit=True):
         """Create a new invitation."""
+        # Create a new invitation instance without saving to the database
         new_invitation = Invitation(
             user_requesting_to_join=user,
             team_to_join=team,
             user_creating_invitation=inviting,
         )
-        new_invitation.save()
+        if commit:
+            # Only save to the database if commit is True
+            new_invitation.save()
         return new_invitation
+
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
