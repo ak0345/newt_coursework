@@ -1,16 +1,19 @@
 """Unit tests for the Team model."""
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from tasks.models import Team
+from tasks.models import Team, User
 
 
 class TeamModelTestCase(TestCase):
-    fixtures = ["tasks/tests/fixtures/other_users.json"]
 
     def setUp(self):
-        self.team = Team.objects.get(
-            team_name="Newt"
-        )  # Replace with appropriate team name from fixtures
+        self.user = User.objects.create_user(username='user', email='user@example.com', password='password')
+        self.team = Team.objects.create(
+            team_name="Newt",
+            description="A description for Newt",
+            unique_identifier="#Newt123",
+            team_owner=self.user
+        )
 
     def test_valid_team_creation(self):
         self._assert_team_is_valid()
@@ -20,8 +23,13 @@ class TeamModelTestCase(TestCase):
         self._assert_team_is_invalid()
 
     def test_team_name_must_be_unique(self):
-        second_team = Team.objects.get(team_name="Team_Newt")
-        self.team.team_name = second_team.team_name
+        Team.objects.create(
+            team_name="Team_Newt",
+            description="Another description",
+            unique_identifier="#Newt456",
+            team_owner=self.user
+        )
+        self.team.team_name = "Team_Newt"
         self._assert_team_is_invalid()
 
     def test_team_name_can_be_100_characters_long(self):
@@ -33,12 +41,17 @@ class TeamModelTestCase(TestCase):
         self._assert_team_is_invalid()
 
     def test_unique_identifier_must_be_unique(self):
-        second_team = Team.objects.get(team_name="Team_Newt")
-        self.team.unique_identifier = second_team.unique_identifier
+        Team.objects.create(
+            team_name="UniqueTeam",
+            description="Unique team description",
+            unique_identifier="#Unique123",
+            team_owner=self.user
+        )
+        self.team.unique_identifier = "#Unique123"
         self._assert_team_is_invalid()
 
     def test_unique_identifier_starts_with_hashtag(self):
-        self.team.unique_identifier = "unique_identifer_invalid"
+        self.team.unique_identifier = "unique_identifier_invalid"
         self._assert_team_is_invalid()
 
     def test_unique_identifier_must_have_at_least_three_alphanumericals(self):
@@ -49,13 +62,11 @@ class TeamModelTestCase(TestCase):
         self.team.unique_identifier = "#Ne!wt"
         self._assert_team_is_invalid()
 
-    def test_unique_identifier_must_contain_at_least_3_alphanumericals_after_hashtag(
-        self,
-    ):
+    def test_unique_identifier_must_contain_at_least_3_alphanumericals_after_hashtag(self):
         self.team.unique_identifier = "#Ne"
         self._assert_team_is_invalid()
 
-    def test_unique_identifier_must_contain_only_one_hastag(self):
+    def test_unique_identifier_must_contain_only_one_hashtag(self):
         self.team.unique_identifier = "##Newt"
         self._assert_team_is_invalid()
 

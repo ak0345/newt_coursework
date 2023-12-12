@@ -1,50 +1,42 @@
-"""Unit tests of the user form."""
-from django import forms
 from django.test import TestCase
+from django.contrib.auth.models import User
 from tasks.forms import UserForm
-from tasks.models import User
 
-class UserFormTestCase(TestCase):
-    """Unit tests of the user form."""
-
-    fixtures = [
-        'tasks/tests/fixtures/default_user.json'
-    ]
-
-    def setUp(self):
-        self.form_input = {
-            'first_name': 'Jane',
-            'last_name': 'Doe',
-            'username': '@janedoe',
-            'email': 'janedoe@example.org',
+class UserFormTest(TestCase):
+    def test_valid_user_form(self):
+        form_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "johndoe@example.com",
+            "gravatar_url": "https://example.com/avatar.jpg",
         }
 
-    def test_form_has_necessary_fields(self):
-        form = UserForm()
-        self.assertIn('first_name', form.fields)
-        self.assertIn('last_name', form.fields)
-        self.assertIn('username', form.fields)
-        self.assertIn('email', form.fields)
-        email_field = form.fields['email']
-        self.assertTrue(isinstance(email_field, forms.EmailField))
-
-    def test_valid_user_form(self):
-        form = UserForm(data=self.form_input)
+        form = UserForm(data=form_data)
         self.assertTrue(form.is_valid())
 
-    def test_form_uses_model_validation(self):
-        self.form_input['username'] = 'badusername'
-        form = UserForm(data=self.form_input)
+    def test_invalid_user_form_missing_fields(self):
+        form_data = {}
+        form = UserForm(data=form_data)
         self.assertFalse(form.is_valid())
 
-    def test_form_must_save_correctly(self):
-        user = User.objects.get(username='@johndoe')
-        form = UserForm(instance=user, data=self.form_input)
-        before_count = User.objects.count()
-        form.save()
-        after_count = User.objects.count()
-        self.assertEqual(after_count, before_count)
-        self.assertEqual(user.username, '@janedoe')
-        self.assertEqual(user.first_name, 'Jane')
-        self.assertEqual(user.last_name, 'Doe')
-        self.assertEqual(user.email, 'janedoe@example.org')
+    def test_invalid_user_form_invalid_email(self):
+        form_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "invalid_email",
+            "gravatar_url": "https://example.com/avatar.jpg",
+        }
+
+        form = UserForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_valid_user_form_optional_gravatar(self):
+        form_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "johndoe@example.com",
+            "gravatar_url": "",
+        }
+
+        form = UserForm(data=form_data)
+        self.assertTrue(form.is_valid())

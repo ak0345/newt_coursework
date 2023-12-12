@@ -47,46 +47,37 @@ class LogInForm(forms.Form):
             user = authenticate(username=username, password=password)
         return user
 
-
-from django import forms
-from .models import Task, Team
-
 class TaskForm(forms.ModelForm):
-    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
-    user_assigned = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.CheckboxSelectMultiple
-    )
-    team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
+    # Add a user argument to the __init__ method
+    def __init__(self, user, *args, **kwargs):
+        super(TaskForm, self).__init__(*args, **kwargs)
+        self.user = user
 
     class Meta:
         model = Task
         fields = [
             "task_heading",
             "task_description",
-            "user_assigned",
             "team_assigned",
             "deadline_date",
             "task_complete",
             "sub_tasks",
-            "priority"
+            "priority",
         ]
 
-    def save(self, user, commit=True):
+    def __init__(self, user=None, *args, **kwargs):
+        super(TaskForm, self).__init__(*args, **kwargs)
+        self.user = user  # Store the user instance
 
-        new_task = super(TaskForm, self).save(commit=False)
-        new_task.task_owner = user
-
-
-        new_task.save()
-
-        new_task.user_assigned.set(self.cleaned_data["user_assigned"])
-
-        return new_task
+    def save(self, commit=True):
+        task = super(TaskForm, self).save(commit=False)
+        task.user = self.user  # Set the user for the task
+        if commit:
+            task.save()
+        return task
 
     def set_team_assigned_queryset(self, user):
         self.fields['team_assigned'].queryset = Team.objects.filter(team_owner=user)
-
 
 
 class EditTaskForm(forms.ModelForm):
@@ -102,8 +93,13 @@ class UserForm(forms.ModelForm):
         """Form options."""
 
         model = User
-        fields = ["first_name", "last_name", "gravatar_url", "username", "email"]
+        fields = ["first_name", "last_name", "email"]
 
+    gravatar_url = forms.URLField(
+        label="Gravatar URL",
+        required=False,  # Set this to True if gravatar is required
+        widget=forms.TextInput(attrs={"placeholder": "https://example.com/avatar.jpg"}),
+    )
 
 class NewPasswordMixin(forms.Form):
     """Form mixing for new_password and password_confirmation fields."""

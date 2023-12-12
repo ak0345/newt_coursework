@@ -1,50 +1,70 @@
 """Unit tests for the Task model."""
-from django.core.exceptions import ValidationError
 from django.test import TestCase
-from tasks.models import User,Task,Team
-from tasks.forms import TaskForm
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+import datetime
+
+from tasks.models import User, Team, Task
+
+
 class TaskModelTest(TestCase):
+    def setUp(self):
+        self.test_user = User.objects.create(username='@testuser', password='12345', email='test@example.com')
+        self.test_team = Team.objects.create(team_name='Test Team', description='A test team', team_owner=self.test_user)
+        self.future_days = 30
+        self.task = Task.objects.create(
+            task_heading='Test Task',
+            task_description='A task for testing',
+            team_assigned=self.test_team,
+            task_owner=self.test_user,
+            deadline_date=timezone.now() + datetime.timedelta(days=self.future_days)
+        )
 
-    def create_users(self):
-        user1 = User.objects.create(first_name= 'Jane',
-            last_name= 'Doe',
-            username= '@janedoe',
-            email= 'janedoe@example.org',)
-        user2 = User.objects.create(first_name= 'Jane2',
-            last_name= 'Doe2',
-            username= '@janedoe2',
-            email= 'janedoe2@example.org',)
+    def test_task_creation(self):
+        self.assertEqual(self.task.task_heading, 'Test Task')
+        self.assertEqual(self.task.task_description, 'A task for testing')
+        self.assertEqual(self.task.team_assigned.team_name, 'Test Team')
+        self.assertEqual(self.task.task_owner.username, '@testuser')
+        self.assertFalse(self.task.task_complete)
 
-        return [user1,user2]
+    def test_task_string_representation(self):
+        self.assertEqual(str(self.task), 'Test Task')
 
-    def create_team(self,owner,**kwargs):
+    def test_task_deadline(self):
+        future_date = timezone.now() + datetime.timedelta(days=25)
+        self.assertTrue(self.task.deadline_date > future_date)
 
-        team = Team.objects.create(team_name='newt', description='New Team', unique_identifier='#wdqd',team_owner=owner)
+    def test_correct_deadline_date(self):
+        expected_deadline = timezone.now() + datetime.timedelta(days=self.future_days)
+        self.assertTrue(abs(self.task.deadline_date - expected_deadline) < datetime.timedelta(seconds=1), "The deadline date is not correctly set")
 
-        team.users_in_team.set(kwargs['users'])
+    def test_task_completion_status_change(self):
+        self.assertFalse(self.task.task_complete)
+        self.task.task_complete = True
+        self.task.save()
+        self.assertTrue(Task.objects.get(id=self.task.id).task_complete)
 
-        return team
+    def test_task_owner_assignment(self):
+        self.assertEqual(self.task.task_owner, self.test_user)
 
-    def test_create_task_via_form(self):
+    def test_task_team_assignment(self):
+        self.assertEqual(self.task.team_assigned, self.test_team)
 
-        user1,user2 = self.create_users()
+def test_past_deadline_date(self):
+    past_date = timezone.now() - datetime.timedelta(days=5)
+    task = Task(
+        task_heading='Past Task',
+        task_description='A task with past deadline',
+        team_assigned=self.test_team,
+        task_owner=self.test_user,
+        deadline_date=past_date
+    )
+    with self.assertRaises(ValidationError):
+        task.full_clean()
 
-        team = self.create_team(user1,users=[user1,user2])
 
-        self.client.login(username=user1.username, password=user1.password)
-
-        form_data = {
-            'task_heading': 'Test Task',
-            'task_description': 'This is a test task.',
-            'user_assigned': [user1.id, user2.id],
-            'team_assigned': team.id,
-            'deadline_date': '2023-12-31',
-            'task_complete': False,
-        }
-        form = TaskForm(data=form_data)
-        self.assertTrue(form.is_valid())
-        new_task = form.save(user=user1)
-        self.assertEqual(new_task.task_heading, 'Test Task')
-        self.assertEqual(new_task.task_owner, user1)
-        self.assertEqual(list(new_task.user_assigned.all()), [user1, user2])
-        self.assertEqual(new_task.task_owner,user1)
+    def test_task_update(self):
+        new_heading = "Updated Task Heading"
+        self.task.task_heading = new_heading
+        self.task.save()
+        self.assertEqual(Task.objects.get(id=self.task.id).task_heading, new_heading)

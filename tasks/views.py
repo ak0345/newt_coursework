@@ -31,6 +31,7 @@ from datetime import datetime
 from django.utils import timezone
 from .models import Comment
 from django.db.models import Q
+import logging
 
 
 def lookup_everything(request):
@@ -87,7 +88,6 @@ def show_team(request, team_id):
         return redirect("team_management")
     else:
         return render(request, "show_team.html", {"team": team})
-
 
 @login_required
 def create_invitation(request, user_id, team_id):
@@ -400,16 +400,25 @@ def dashboard(request):
 
     return render(request, "dashboard.html", {"tasks": tasks, "all_teams": all_teams, "display_tasks_settings": display_tasks_settings})
 
+"""
+def create_task(request):
+    logger.debug("Inside create_task view")
+    form = TaskForm(user=request.user)
 
-from django.shortcuts import render, redirect
-from .forms import TaskForm  # Import your TaskForm
+    if request.method == "POST":
+        logger.debug("POST request received")
+        form = TaskForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            logger.debug("Form is valid. Task saved.")
+            return redirect("dashboard")
+        else:
+            logger.debug("Form is invalid. Errors: %s", form.errors)
 
+    return render(request, "create_task.html", {"form": form})"""
 
 def create_task(request):
     form = TaskForm()  # Create an instance of the form
-    form.set_team_assigned_queryset(
-        request.user
-    )  # Filter team_assigned queryset for the current user
 
     if request.method == "POST":
         form = TaskForm(request.POST)

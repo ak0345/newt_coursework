@@ -16,6 +16,7 @@ class TeamCreationViewTestCase(TestCase):
             "description": "B",
         }
 
+
         # Create a user and log them in
         self.user = User.objects.create_user(
             username="@janedoe", password="123Password"
@@ -25,6 +26,7 @@ class TeamCreationViewTestCase(TestCase):
     def test_team_creation_url(self):
         self.assertEqual(self.url, "/create_team/")
 
+
     def test_get_team_creation(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -32,6 +34,7 @@ class TeamCreationViewTestCase(TestCase):
         form = response.context["form"]
         self.assertTrue(isinstance(form, TeamCreationForm))
         self.assertFalse(form.is_bound)
+
 
     def test_unsuccesful_team_creation(self):
         self.form_input["unique_identifier"] = "unique2"
@@ -44,6 +47,7 @@ class TeamCreationViewTestCase(TestCase):
         form = response.context["form"]
         self.assertTrue(isinstance(form, TeamCreationForm))
         self.assertTrue(form.is_bound)
+
 
     def test_successful_team_creation(self):
         before_count = Team.objects.count()
@@ -58,3 +62,4 @@ class TeamCreationViewTestCase(TestCase):
         team = Team.objects.get(team_name="Team_2")
         self.assertEqual(team.unique_identifier, "#Unique2")
         self.assertEqual(team.description, "B")
+    

@@ -1,55 +1,72 @@
-"""Tests of the task related views."""
 from django.test import TestCase
-from tasks.models import User,Task,Team
+from django.urls import reverse
+from tasks.forms import TaskForm
+from tasks.models import User
+from tasks.models import Task
+logger = logging.getLogger(__name__)
 
-class TaskViewTest(TestCase):
+class TaskCreationViewTestCase(TestCase):
+    """Tests for the task creation view."""
 
-    def create_users(self):
-        user1 = User.objects.create(first_name= 'Jane',
-            last_name= 'Doe',
-            username= '@janedoe',
-            email= 'janedoe@example.org',)
-        user2 = User.objects.create(first_name= 'Jane2',
-            last_name= 'Doe2',
-            username= '@janedoe2',
-            email= 'janedoe2@example.org',)
-
-        return [user1,user2]
-
-    def create_team(self,owner,**kwargs):
-
-        team = Team.objects.create(team_name='newt', description='New Team', unique_identifier='#wdqd',team_owner=owner)
-
-        team.users_in_team.set(kwargs['users'])
-
-        return team
-
-    def test_create_task_view_get(self):
-        user1,user2 = self.create_users()
-
-        self.client.login(username=user1.username, password=user1.password)
-
-        response = self.client.get('/create_task/')
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'create_task.html')
-
-    def test_create_task_view_post(self):
-
-        user1,user2 = self.create_users()
-
-        team = self.create_team(user1,users=[user1,user2])
-
-        self.client.login(username=user1.username, password=user1.password)
-
-        form_data = {
-            'task_heading': 'Test Task',
-            'task_description': 'This is a test task.',
-            'user_assigned': [user1.id, user2.id],
-            'team_assigned': team.id,
-            'deadline_date': '2023-12-31',
-            'task_complete': False,
-            
+    def setUp(self):
+        self.url = reverse("create_task")
+        self.form_data = {
+            "task_heading": "Test Task",
+            "task_description": "This is a test task.",
+            "team_assigned": "team1",  # Assuming you have a team with the identifier "team1"
+            "deadline_date": "2023-12-31",
+            "task_complete": False,
+            "priority": Task.PRIORITY_CHOICES[0][0],
         }
-        response = self.client.post('/create_task/', data=form_data)
-        self.assertRedirects(response, '/dashboard/')  # Adjust the URL based on your project's routing
-        self.assertEqual(Task.objects.count(), 1)
+
+        # Create a user and log them in
+        self.user = User.objects.create_user(
+            username="@janedoe", password="123Password"
+        )
+        self.client.login(username="@janedoe", password="123Password")
+    
+    
+
+    def test_task_creation_url(self):
+        self.assertEqual(self.url, "/create_task/")
+
+    def test_get_task_creation(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "create_task.html")
+        form = response.context["form"]
+        self.assertTrue(isinstance(form, TaskForm))
+        self.assertFalse(form.is_bound)
+
+    def test_successful_task_creation(self):
+        before_count = Task.objects.count()
+        # Pass the user instance when initializing the TaskForm
+        form = TaskForm(user=self.user)
+        response = self.client.post(self.url, {**self.form_data, "user": self.user}, follow=True)
+        after_count = Task.objects.count()
+        self.assertEqual(after_count, before_count + 1)
+        response_url = reverse("dashboard")
+        self.assertRedirects(
+            response, response_url, status_code=302, target_status_code=200
+        )
+        self.assertTemplateUsed(response, "dashboard.html")
+        task = Task.objects.get(task_heading="Test Task")
+        self.assertEqual(task.task_description, "This is a test task.")
+        # Add more assertions as needed for other task attributes
+
+    def test_blank_task_creation_form(self):
+        # Pass the user instance when initializing the TaskForm
+        form = TaskForm(user=self.user)
+        # Test submitting a form with blank fields
+        before_count = Task.objects.count()
+        response = self.client.post(reverse("create_task"), {**self.form_data, "user": self.user}, follow=True)
+        after_count = Task.objects.count()
+        self.assertEqual(after_count, before_count)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "create_task.html")
+        form = response.context["form"]
+        self.assertTrue(isinstance(form, TaskForm))
+        self.assertTrue(form.is_bound)
+        self.assertTrue(form.errors)  # Check for form errors indicating required fields.
+
+    # Add more test methods for different scenarios as needed

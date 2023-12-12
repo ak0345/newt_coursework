@@ -1,0 +1,37 @@
+# tests/test_views.py
+
+from django.test import TestCase
+from django.urls import reverse
+
+from tasks.models import User, Team  
+
+class InviteUserTestCase(TestCase):
+
+    def setUp(self):
+        self.team = Team.objects.create(
+            team_name='Test Team', 
+            team_owner=User.objects.create_user(
+                username='testuser', 
+                email='test@example.com',
+                password='password'
+            )
+        )
+        self.user = User.objects.create_user(
+            username='inviteduser',
+            email='invited@example.com', 
+            password='password'
+        )
+
+    def test_invite_user_view(self):
+        """Test inviting a valid user to a team"""
+        self.client.login(username='testuser', password='password')
+        
+        response = self.client.post(
+           reverse('invite_user', kwargs={'team_id': self.team.id, 'inviting_id': self.team.team_owner.id}), 
+           data={'input_username': self.user.username}
+        )
+        
+        self.assertRedirects(response, reverse('team_management'))
+        
+        # Assert user was added to team 
+        self.assertIn(self.user, self.team.users_in_team.all())

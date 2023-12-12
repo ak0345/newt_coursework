@@ -95,12 +95,16 @@ class Task(models.Model):
     )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
-    deadline_date = models.DateTimeField(null=True, blank=True)
+    deadline_date = models.DateTimeField(null=True, blank=True, validators=[validate_future_date])
     task_complete = models.BooleanField(default=False)
     completion_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=NOT_STARTED
     )
+
+    def set_default_deadline(self):
+        self.deadline_date = timezone.now() + datetime.timedelta(days=30)
+        self.save()
 
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=LOW)
 
