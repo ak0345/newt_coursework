@@ -6,7 +6,9 @@ from tasks.forms import SignUpForm
 from tasks.models import User
 
 class SignUpFormTestCase(TestCase):
-    """Unit tests of the sign up form."""
+    """Unit testing for the sign up form. """
+
+
 
     def setUp(self):
         self.form_input = {
