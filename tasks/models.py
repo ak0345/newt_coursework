@@ -136,7 +136,7 @@ class Task(models.Model):
 
 
 class Team(models.Model):
-    team_name = models.CharField(max_length=100, unique=True, blank=False)
+    team_name = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=False)
     team_owner = models.ForeignKey(
         "User",
