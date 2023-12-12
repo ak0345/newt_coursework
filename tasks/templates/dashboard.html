@@ -1,71 +1,284 @@
-{% extends 'base_content.html' %}
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <h3>Welcome to your dashboard, {{ user.first_name }}</h3>
-            <h5 class="text-muted">Logged in as {{ user.username }}</h5>
-        </div>
-    </div>
+{% extends 'base_content.html' %} {% block content %}
+<div class="container-fluid px-5 mt-5 overflow-hidden">
+    <style>
+        .scrollable-content::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+  <div class="row gy-2 justify-content-end text-start">
     
-    <h2 class="mt-4 mb-3">Task Dashboard</h2>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href='{% url 'create_task' %}' class="btn btn-lg btn-primary">
-            Create Task
-        </a>
-
-        <div class="dropdown">
-            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="priorityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                Filter by Priority
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="priorityDropdown">
-                <li><a class="dropdown-item" href="{% url 'high_priority_tasks' %}">High Priority</a></li>
-                <li><a class="dropdown-item" href="{% url 'medium_priority_tasks' %}">Medium Priority</a></li>
-                <li><a class="dropdown-item" href="{% url 'low_priority_tasks' %}">Low Priority</a></li>
-            </ul>
+    <div class="col-auto justify-content-end text-center px-0 mx-0">
+      <form class="col-auto px-0  text-center" method="post" action="{% url 'dashboard' %}">
+          {% csrf_token %}
+          <button class="disabled btn btn-sm" style="width: 2rem;"><i class="bi bi-chat-right-text-fill"></i></button>
+          <button name="filter_tasks" value="toggle_simplified" type="submit" 
+          {% if display_tasks_settings.simplified_view == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>Simplified View</button>
+          <button class="disabled btn btn-sm" style="width: 2rem;"><i class="bi bi-eye-fill"></i></button>
+          
+          <button name="filter_tasks" value="toggle_low_priority" type="submit" 
+          {% if display_tasks_settings.show_low == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}
+          style="width: 2rem;">!</button>
+          <button name="filter_tasks" value="toggle_medium_priority" type="submit" 
+          {% if display_tasks_settings.show_medium == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}
+          style="width: 2rem;">!!</button>
+          <button name="filter_tasks" value="toggle_high_priority" type="submit" 
+          {% if display_tasks_settings.show_high == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}
+          style="width: 2rem;">!!!</button>
+          <button name="filter_tasks" value="toggle_not_started" type="submit" 
+          {% if display_tasks_settings.show_not_started == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>Not Started</button>
+          <button name="filter_tasks" value="toggle_in_progress" type="submit" 
+          {% if display_tasks_settings.show_in_progress == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>In Progress</button>
+          <button name="filter_tasks" value="toggle_completed" type="submit" 
+          {% if display_tasks_settings.show_completed == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>Completed</button>
+          
+          <button type="submit" class="disabled btn btn-sm" style="width: 2rem;"><i class="bi bi-sort-down-alt"></i></button>
+          <button name="filter_tasks" value="toggle_date" type="submit" 
+          {% if display_tasks_settings.show_oldest_first == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>Date (Oldest first)</button>
+          <button name="filter_tasks" value="toggle_priority" type="submit" 
+          {% if display_tasks_settings.show_low_priority_first == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>Priority (High first)</button>
+          <button name="filter_tasks" value="toggle_status" type="submit" 
+          {% if display_tasks_settings.show_not_started_first == False %}
+          class="btn btn-sm btn-outline-dark"
+          {% else %}
+          class="btn btn-sm btn-dark"
+          {% endif %}>Status (Not Started first)</button>
+      </form>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'create_task' %}">
+        <button type="button" class="btn-sm btn btn-success">+ Create Task</button>
+      </a>
+    </div>
+  </div>
+  
+  
+</div>
+<div class="position-relative flex-nowrap row overflow-auto mt-5 m-0 gx-4 px-5 scrollable-content" >
+    {% for team in all_teams %}
+          {% if user == team.team_owner or user in team.users_in_team.all %}
+          <div class="col-xl-3 col-lg-4 col-sm-8">
+            <div class="col-12 rounded-top rounded-lg px-3 text-light py-2 bg-dark"><h4 class="mt-2">&nbsp;<strong>{{ team.team_name }}</strong></h4></div>
+            <div class="row justify-content-center py-4">
+                {% for task in tasks %}
+                {% if task.team_assigned == team %}
+    <div class="row mb-3 mx-0 justify-content-center">
+        <div class="row border rounded px-0 mx-0 ">
+            <div class="rounded-top px-3 py-2 bg-dark m-0">
+                <div class="row justify-content-center">
+                    <div 
+                    {% if task.status != "Not Started" %}
+                    class="col-5 flex align-self-center m-0">
+                      {% else %}
+                      class="col-5 flex align-self-center m-0">
+                      {% endif %}
+                        <h6 class="align-self-center m-0">
+                          <a
+                            class="text-light text-break"
+                            style="text-decoration: none"
+                            ><strong>{{ task.task_heading }}</strong></a
+                          >
+                        </h6>
+                        
+                      </div>
+                      <div 
+                      {% if task.status != "Not Started" %}
+                      class="col-7 text-end">
+                      {% else %}
+                      class="col-7 text-end">
+                      {% endif %}
+                      
+                        <div 
+                          class="row">
+                          <form
+                          
+                          method="post"
+                          action="{% url 'update_task_status' task.id %}"
+                        >
+                          {% csrf_token %}
+                          {% if task.status != 'In Progress' and task.status != 'Completed' %}
+                          <button
+                          {% if task.status == 'Not Started' %}
+                            class="border border-danger rounded bg-danger"
+                          {% else %}
+                            class="border border-danger rounded bg-dark"
+                          {% endif %}
+                            type="submit"
+                            name="new_status"
+                            value="Not Started"
+                          >
+                            <option style="display: none" value="Not Started"></option>
+                            <i 
+                            {% if task.status == 'Not Started' %}
+                            class="bi bi-hourglass text-light"
+                            {% else %}
+                            class="bi bi-hourglass text-danger"
+                            {% endif %}
+                            >
+                          </i>
+                          </button>
+                          {% endif %}
+                          <button
+                          {% if task.status == 'In Progress' %}
+                          class="border border-warning rounded bg-warning"
+                          {% else %}
+                          class="border border-warning rounded bg-dark"
+                          {% endif %}
+                            type="submit"
+                            name="new_status"
+                            value="In Progress"
+                          >
+                            <option style="display: none" value="In Progress"></option>
+                            <i 
+                            {% if task.status == 'In Progress' %}
+                            class="bi bi-hourglass-split text-light"
+                            {% else %}
+                            class="bi bi-hourglass-split text-warning"
+                            {% endif %}
+                            ></i>
+                          </button>
+                          <button
+                          {% if task.status == 'Completed' %}
+                          class="border border-success rounded bg-success"
+                          {% else %}
+                          class="border border-success rounded bg-dark"
+                          {% endif %}
+                            type="submit"
+                            name="new_status"
+                            value="Completed"
+                          >
+                            <option style="display: none" value="Complete"></option>
+                            <i 
+                            {% if task.status == 'Completed' %}
+                            class="bi bi-hourglass-bottom text-light"
+                            {% else %}
+                            class="bi bi-hourglass-bottom text-success"
+                            {% endif %}
+                            ></i>
+                          </button>
+                          <a href="{% url 'edit_task' task.id %}"><button type="button" class="border rounded bg-dark border-light"><i class="bi text-light bi-pencil-fill"></i></i></button></a>
+                          
+                        </form>
+                        
+                        </div>
+                        {% if not display_tasks_settings.simplified_view %}
+                        <div class="text-end mt-1">
+                          {% if task.priority == 'High' %}
+                          <span class="badge badge-pill badge-danger bg-danger">!!! High Priority</span>
+                          {% elif task.priority == 'Medium' %}
+                          <span class="badge badge-pill badge-warning bg-warning">!! Medium Priority</span>
+                          {% elif task.priority == 'Low' %}
+                          <span class="badge badge-pill badge-success bg-success">! Low Priority</span>
+                          {% endif %}
+                          {% if task.status == 'Not Started' %}
+                          <span class="badge badge-pill badge-danger bg-danger">Not Started</span>
+                          {% elif task.status == 'In Progress' %}
+                          <span class="badge badge-pill badge-warning bg-warning">In Progress</span>
+                          {% elif task.status == 'Completed' %}
+                          <span class="badge badge-pill badge-success bg-success">Completed</span>
+                          {% endif %}
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                </div>
+            <div class="p-0">
+              <p class="mt-2 px-2">{{ task.task_description }}</p>
+              
+              <small class="row text-muted mt-0 p-2 ">
+                <strong class="">Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }}
+              </small>
+              {% if not display_tasks_settings.simplified_view %}
+              <form method="post" action="{% url 'add_comment' task.id %}" class="row mb-2 h-auto mt-1 px-4 comment-form">
+                {% csrf_token %}
+                <textarea name="comment" rows="4" placeholder="Add a comment..." class="form-control mb-2"></textarea>
+                <button type="submit" class="btn btn-sm btn-outline-dark">Comment</button>
+              </form>
+        
+                
+                <div class="row rounded px-4">
+                  {% for comment in task.comment_set.all %}
+                    <span class="text-wrap text-break">
+                      <small>{{ comment.Commentor.username }}: {{ comment.text }}</small>
+                      <small class="text-muted"></small>
+                    </span>
+                  {% empty %}
+                    <div></div>
+                  {% endfor %}
+                </div>
+              
+              {% endif %}
+              
+              
+              <div 
+              {% if task.status == 'In Progress' %}
+              class="rounded-bottom mt-2 py-1 row m-0 p-0 bg-warning"><small>
+                {% load tz %}
+                {% with current_time=now|timezone:"UTC" %}
+                {% with deadline_time=task.deadline_date|timezone:"UTC" %}
+                {% with time_difference=deadline_time|timeuntil:current_time %}
+                Time remaining: {{ time_difference }}
+                {% endwith %}
+                {% endwith %}
+                {% endwith %}
+                </small>
+                {% if task.running_time %}
+                <small class="text-muted">Running Time: {{ task.running_time }}</small>
+                {% endif %} 
+              {% elif task.status == 'Completed' %}
+              {% if task.completion_time <= task.deadline_date %}
+              class="rounded-bottom py-1 row m-0 p-0 mt-2 text-light bg-success"><small>Finished on time:&nbsp;{{ task.completion_time }}</small>
+              {% else %}
+              class="rounded-bottom py-1 row m-0 p-0 mt-2 text-light bg-danger"><small>Finished late:&nbsp;{{ task.completion_time }}</small>
+              {% endif %}
+              {% elif task.status == 'Not Started' %}
+              class="rounded-bottom py-1 row m-0 p-0 mt-2 bg-light border-top"><small>Deadline:&nbsp;{{ task.deadline_date }}</small>
+              {% endif %}
+            </div>
+            </div>
         </div>
     </div>
-
-    <ul class="list-group">
-        {% for task in tasks %}
-        <li class="list-group-item">
-            <div>
-                <h5 class="mb-1"><a href="{% url 'show_task' task.id %}" style="text-decoration: none; color: blue;">{{ task.task_heading }}</a></h5>
-                <p class="mb-1">{{ task.task_description }}</p>
-                <small class="text-muted">
-                    <strong>Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }} |
-                    <strong>Owner:</strong> {{ task.task_owner.username }} |
-                    <strong>Created:</strong> {{ task.creation_date }} |
-                    <strong>Deadline:</strong> {{ task.deadline_date }} |
-                    <strong>Complete:</strong> {{ task.task_complete }}
-                </small>
-                <form class="mt-2" method="post" action="{% url 'update_task_status' task.id %}">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <select class="form-select me-2" name="new_status">
-                            <option value="Not Started" {% if task.status == 'Not Started' %} selected {% endif %}>Not Started</option>
-                            <option value="In Progress" {% if task.status == 'In Progress' %} selected {% endif %}>In Progress</option>
-                            <option value="Completed" {% if task.status == 'Completed' %} selected {% endif %}>Completed</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
-                    </div>
-                </form>
-                {% if task.status == 'In Progress' %}
-                    <small class="text-muted">Status: In Progress</small>
-                    {% if task.running_time %}
-                        <small class="text-muted">Running Time: {{ task.running_time }}</small>
-                    {% endif %}
-                {% elif task.status == 'Completed' %}
-                    <small class="text-muted">Status: Completed</small>
-                    {% if task.completion_time %}
-                        <small class="text-muted">Completion Time: {{ task.completion_time }}</small>
-                    {% endif %}
-                {% else %}
-                    <small class="text-muted">Status: Not Started</small>
-                {% endif %}
+    {% endif %}
+    {% endfor %}
             </div>
-        </li>
-        {% endfor %}
-    </ul>
+          </div>
+          {% endif %}
+    {% endfor %}
+    
 </div>
 {% endblock %}

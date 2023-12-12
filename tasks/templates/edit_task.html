@@ -1,15 +1,25 @@
-{% extends 'base_content.html' %}
-
-{% block content %}
+{% extends 'base_content.html' %} {% block content %}
 <div class="container">
-  <a href='{% url 'dashboard' %}' class="btn btn-lg btn-secondary">
-    Go Back
-  </a>
-  <h1>Edit Task</h1>
-  <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-lg btn-secondary">Update Task</button>
-  </form>
+  <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
+  <div class="row">
+    <div class="col mt-4">
+      <h3>Edit your task</h3>
+    </div>
+    <div class="col-auto mt-4">
+      <form
+        method="POST"
+        action="{% url 'delete_task' task.id %}"
+        class="d-inline"
+      >
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Task</button>
+      </form>
+    </div>
+
+    <form class="mt-4" method="post">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit" class="mt-4 btn btn-dark">Update Task</button>
+    </form>
+  </div>
+  {% endblock %}
 </div>
-{% endblock %}

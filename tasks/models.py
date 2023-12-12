@@ -131,6 +131,9 @@ class Task(models.Model):
         (LOW, "Low"),
     ]
 
+    def __str__(self):
+        return self.task_heading
+
 
 class Team(models.Model):
     team_name = models.CharField(max_length=100, blank=False)
@@ -160,11 +163,16 @@ class Team(models.Model):
         ],
     )
 
+    def __str__(self):
+        return self.team_name
+
 
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    Commentor = models.ForeignKey(User, on_delete=models.CASCADE , default = 1)  # New field for the commenter
+
 
     def comment_description(self):
         return f"Comment on {self.task.task_heading}"

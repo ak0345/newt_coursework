@@ -48,7 +48,17 @@ class LogInForm(forms.Form):
         return user
 
 
+from django import forms
+from .models import Task, Team
+
 class TaskForm(forms.ModelForm):
+    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
+    user_assigned = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
+    team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
+
     class Meta:
         model = Task
         fields = [
@@ -58,25 +68,15 @@ class TaskForm(forms.ModelForm):
             "team_assigned",
             "deadline_date",
             "task_complete",
+            "sub_tasks",
+            "priority"
         ]
-    
-    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
-    user_assigned = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.CheckboxSelectMultiple
-    )
-    team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
 
     def save(self, user, commit=True):
-        new_task = Task(
-            task_heading=self.cleaned_data["task_heading"],
-            task_description=self.cleaned_data["task_description"],
-            task_owner=user,
-            team_assigned=self.cleaned_data["team_assigned"],
-            deadline_date=self.cleaned_data["deadline_date"],
-            task_complete=self.cleaned_data["task_complete"],
-            priority=self.cleaned_data["priority"],
-        )
+
+        new_task = super(TaskForm, self).save(commit=False)
+        new_task.task_owner = user
+
 
         new_task.save()
 
@@ -84,11 +84,15 @@ class TaskForm(forms.ModelForm):
 
         return new_task
 
+    def set_team_assigned_queryset(self, user):
+        self.fields['team_assigned'].queryset = Team.objects.filter(team_owner=user)
+
+
 
 class EditTaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        exclude = ["task_owner", "task_complete", "completion_time", "status"]
+        exclude = ["task_owner",  "task_complete", "completion_time", "status"]
 
 
 class UserForm(forms.ModelForm):
@@ -211,12 +215,11 @@ class TeamCreationForm(forms.ModelForm):
 class EditTeamForm(forms.ModelForm):
     class Meta:
         model = Team
-        fields = ["team_name", "unique_identifier", "description", "team_owner"]
+        fields = ["team_name", "unique_identifier", "description"]
 
     def save(self, user, team_instance, commit=True):
         """Update an existing team."""
         team_instance.team_name = self.cleaned_data["team_name"]
-        team_instance.team_owner = self.cleaned_data["team_owner"]
         team_instance.unique_identifier = self.cleaned_data["unique_identifier"]
         team_instance.description = self.cleaned_data["description"]
 
