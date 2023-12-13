@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Task, Team, Comment
+from .models import User, Task, Team, Comment, Invitation
 
 # Register your models here.
 
@@ -92,4 +92,14 @@ class CommentAdmin(admin.ModelAdmin):
         "task",
         "text",
         "Commentor",
+    ]
+
+@admin.register(Invitation)
+class InvitationAdmin(admin.ModelAdmin):
+    search_fields = ("team_to_join__unique_identifier", )
+    list_display = [
+        "id",
+        "team_to_join",
+        "user_requesting_to_join",
+        "user_creating_invitation",
     ]

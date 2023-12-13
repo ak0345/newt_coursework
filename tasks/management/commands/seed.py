@@ -174,13 +174,13 @@ class Command(BaseCommand):
 
     def generate_invitation(self):
         team_to_join = choice(Team.objects.all())
-        user_requesting_to_join = choice(team_to_join.users_in_team.all())
+        user_creating_invitation = choice(team_to_join.users_in_team.all())
 
         users = []
         for user in team_to_join.users_in_team.all():
             users.append(user.username)
 
-        user_creating_invitation = choice(User.objects.exclude(username=users))
+        user_requesting_to_join = choice(User.objects.exclude(username=users))
         
 
         Invitation.objects.create(
