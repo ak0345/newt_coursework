@@ -464,11 +464,13 @@ def edit_task(request, task_id):
     task = Task.objects.get(id=task_id)
     if request.method == "POST":
         form = EditTaskForm(request.POST, instance=task)
+        form.set_team_assigned_queryset(request.user)
         if form.is_valid():
             form.save()
             return redirect("dashboard")
     else:
         form = EditTaskForm(instance=task)
+        form.set_team_assigned_queryset(request.user)
 
     return render(request, "edit_task.html", {"form": form, "task": task})
 

@@ -1,15 +1,17 @@
 {% extends 'base_content.html' %}
-
 {% block content %}
+
 <div class="container">
   <a class="mt-4 text-dark" href="{% url 'team_management' %}">Back to Team Management</a>
   <div class="row">
     <div class="col">
+      {% if user == team.team_owner %}
       <div class="float-right mt-4">
         <a href="{% url 'edit_team' team_id=team.id %}">
           <button type="button" class="btn btn-outline-primary">Edit Team</button>
         </a>
       </div>
+      {% endif %}
       <div class="row">
         <div class="col mt-4">
           <h3>
@@ -21,7 +23,7 @@
         </div>
         <div class="col-md-auto"></div>
         <div class="col-sm-auto mt-4">
-          {% if not user in team.users_in_team.all %}
+          {% if not user in team.users_in_team.all and user != team.team_owner %}
           <div class="row">
             <a href="{% url 'create_team' %}">
               <button type="button" class="btn btn-outline-dark w-100 mb-2">Request to Join</button>
@@ -78,7 +80,7 @@
         </ul>
       </div>
       <!-- Invite user form -->
-      {% if user in team.users_in_team.all %}
+      {% if user in team.users_in_team.all or user == team.team_owner %}
       <div class="row mt-4">
         <h3>Invite User:</h3>
 

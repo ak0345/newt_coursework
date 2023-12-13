@@ -1,4 +1,5 @@
-{% extends 'base_content.html' %} {% block content %}
+{% extends 'base_content.html' %}
+{% block content %}
 <div class="container-fluid px-5 mt-5 overflow-hidden">
     <style>
         .scrollable-content::-webkit-scrollbar {
@@ -221,7 +222,7 @@
               <p class="mt-2 px-2">{{ task.task_description }}</p>
               
               <small class="row text-muted mt-0 p-2 ">
-                <strong class="">Assigned To:</strong> {{ task.assigned_tasks.all|join:', ' }}
+                <strong class="">Assigned To:</strong> {{ task.user_assigned.all|join:', ' }}
               </small>
               {% if not display_tasks_settings.simplified_view %}
               <form method="post" action="{% url 'add_comment' task.id %}" class="row mb-2 h-auto mt-1 px-4 comment-form">
