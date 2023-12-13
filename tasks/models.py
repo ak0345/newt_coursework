@@ -24,8 +24,6 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=False)
     gravatar_url = models.URLField(max_length=255, blank=True, null=True)
     email = models.EmailField(unique=True, blank=False)
-    owned_tasks = models.ManyToManyField("Task", blank=True, related_name="task_owners")
-    owned_teams = models.ManyToManyField("Team", blank=True, related_name="team_owners")
 
     class Meta:
         """Model options."""
@@ -78,9 +76,7 @@ class Task(models.Model):
     task_description = models.CharField(max_length=160, null=True, blank=True)
     team_assigned = models.ForeignKey(
         "Team",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name="team_assigned_tasks",
     )
     task_owner = models.ForeignKey(
@@ -93,8 +89,8 @@ class Task(models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
-    creation_date = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
+    creation_date = models.DateTimeField(auto_now=True, blank=False)
+    last_modified = models.DateTimeField(auto_now_add=True, blank=False)
     deadline_date = models.DateTimeField(null=True, blank=True)
     task_complete = models.BooleanField(default=False)
     completion_time = models.DateTimeField(null=True, blank=True)
@@ -103,10 +99,6 @@ class Task(models.Model):
     )
 
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=LOW)
-
-    sub_tasks = models.ManyToManyField(
-        "self", blank=True, symmetrical=False, related_name="subtasks"
-    )
 
     class Meta:
         ordering = ["task_heading"]
@@ -151,7 +143,7 @@ class Team(models.Model):
         # validators = [check_users_team] - this may need to be updated / a new one made
     )
     creation_date = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now_add=True)
     unique_identifier = models.CharField(
         max_length=50,
         unique=True,
@@ -170,8 +162,8 @@ class Team(models.Model):
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     text = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    Commentor = models.ForeignKey(User, on_delete=models.CASCADE , default = 1)  # New field for the commenter
+    created_at = models.DateTimeField(auto_now=True, blank=False)
+    Commentor = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default = 1)  # New field for the commenter
 
 
     def comment_description(self):

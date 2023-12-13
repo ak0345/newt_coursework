@@ -9,9 +9,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Unseed the database."""
 
-        User.objects.filter(is_staff=False, is_superuser=False).delete()
+        User.objects.all().filter(is_staff=False, is_superuser=False).delete()
         Task.objects.all().delete()
-        Team.objects.all().delete()
+        Team.objects.all().exclude(unique_identifier="#KCL").delete()
         Comment.objects.all().delete()
         Invitation.objects.all().delete()
         

@@ -58,13 +58,6 @@ urlpatterns = [
     path("team/<int:team_id>", views.show_team, name="show_team"),
     path("task/<int:task_id>/", views.show_task_details, name="show_task"),
     path("delete_task/<int:task_id>/", views.delete_task, name="delete_task"),
-    path("high-priority-tasks/", views.high_priority_tasks, name="high_priority_tasks"),
-    path(
-        "medium-priority-tasks/",
-        views.medium_priority_tasks,
-        name="medium_priority_tasks",
-    ),
-    path("low-priority-tasks/", views.low_priority_tasks, name="low_priority_tasks"),
     path("add_comment/<int:task_id>/", views.add_comment, name="add_comment"),
     path("add_comment/<int:task_id>/", views.add_comment, name="add_comment"),
     path("add_comment/<int:task_id>/", views.add_comment, name="add_comment"),

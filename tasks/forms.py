@@ -7,6 +7,7 @@ from .models import Task
 from .models import Team
 from .models import Invitation
 from django.forms import ModelForm
+from django.db.models import Q
 
 
 class TeamSearchForm(forms.Form):
@@ -52,40 +53,18 @@ from django import forms
 from .models import Task, Team
 
 class TaskForm(forms.ModelForm):
-    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
-    user_assigned = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.CheckboxSelectMultiple
-    )
-    team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
+    #priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
+    #team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
+    #user_assigned = forms.ModelMultipleChoiceField(
+        #queryset=User.objects.all() if team_assigned == 'None' else Team.objects.filter(unique_identifier=team_assigned).values(),
+    #)
 
     class Meta:
         model = Task
-        fields = [
-            "task_heading",
-            "task_description",
-            "user_assigned",
-            "team_assigned",
-            "deadline_date",
-            "task_complete",
-            "sub_tasks",
-            "priority"
-        ]
-
-    def save(self, user, commit=True):
-
-        new_task = super(TaskForm, self).save(commit=False)
-        new_task.task_owner = user
-
-
-        new_task.save()
-
-        new_task.user_assigned.set(self.cleaned_data["user_assigned"])
-
-        return new_task
+        exclude = ["task_owner",  "task_complete", "completion_time", "status"]
 
     def set_team_assigned_queryset(self, user):
-        self.fields['team_assigned'].queryset = Team.objects.filter(team_owner=user)
+        self.fields['team_assigned'].queryset = Team.objects.filter(Q(team_owner=user) | Q(users_in_team=user) )
 
 
 
@@ -93,6 +72,9 @@ class EditTaskForm(forms.ModelForm):
     class Meta:
         model = Task
         exclude = ["task_owner",  "task_complete", "completion_time", "status"]
+
+    def set_team_assigned_queryset(self, user):
+        self.fields['team_assigned'].queryset = Team.objects.filter(Q(team_owner=user) | Q(users_in_team=user))
 
 
 class UserForm(forms.ModelForm):

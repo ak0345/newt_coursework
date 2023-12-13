@@ -327,6 +327,8 @@ def dashboard(request):
     
     all_teams = Team.objects.all()
 
+    tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
+
     if request.method == "POST":
         option_picked = request.POST.get("filter_tasks")
         if option_picked == "toggle_low_priority":
@@ -380,7 +382,7 @@ def dashboard(request):
         )
         tasks = Task.objects.alias(priority_order=priority_order).order_by("priority_order", "priority")
     if display_tasks_settings['show_oldest_first']:
-        tasks = Task.objects.filter(task_owner=request.user).order_by('creation_date')
+        tasks = tasks.order_by('creation_date')
         
     
     if display_tasks_settings['show_low'] == False:
@@ -389,6 +391,8 @@ def dashboard(request):
             tasks = tasks.exclude(priority="Medium")
     if display_tasks_settings['show_high'] == False:
             tasks = tasks.exclude(priority="High")
+    #if display_tasks_settings['show_low'] == False and display_tasks_settings['show_medium'] == False and display_tasks_settings['show_high'] == False:
+            #tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
     if display_tasks_settings['show_not_started'] == False:
             tasks = tasks.exclude(status="Not Started")
     if display_tasks_settings['show_in_progress'] == False:
@@ -414,7 +418,9 @@ def create_task(request):
     if request.method == "POST":
         form = TaskForm(request.POST)
         if form.is_valid():
-            form.save(user=request.user)
+            task = form.save(commit=False)
+            task.task_owner = request.user
+            task.save()
             return redirect("dashboard")
 
     return render(request, "create_task.html", {"form": form})
@@ -464,11 +470,13 @@ def edit_task(request, task_id):
     task = Task.objects.get(id=task_id)
     if request.method == "POST":
         form = EditTaskForm(request.POST, instance=task)
+        form.set_team_assigned_queryset(request.user)
         if form.is_valid():
             form.save()
             return redirect("dashboard")
     else:
         form = EditTaskForm(instance=task)
+        form.set_team_assigned_queryset(request.user)
 
     return render(request, "edit_task.html", {"form": form, "task": task})
 
@@ -545,56 +553,6 @@ def team_delete(request, team_id):
         team.delete()
         return redirect("team_management")
     return render(request, "team_management.html", {"team": team})
-
-
-def high_priority_tasks(request):
-    user_logged_in = request.user
-
-    all_high_priority_tasks = Task.objects.filter(priority="High")
-    high_priority_tasks = []
-
-    for task in all_high_priority_tasks:
-        if (
-            user_logged_in in task.user_assigned.all()
-            or user_logged_in == task.task_owner
-        ):
-            high_priority_tasks.append(task)
-
-    return render(request, "high_priority_tasks.html", {"tasks": high_priority_tasks})
-
-
-def medium_priority_tasks(request):
-    user_logged_in = request.user
-
-    all_medium_priority_tasks = Task.objects.filter(priority="Medium")
-    medium_priority_tasks = []
-
-    for task in all_medium_priority_tasks:
-        if (
-            user_logged_in in task.user_assigned.all()
-            or user_logged_in == task.task_owner
-        ):
-            medium_priority_tasks.append(task)
-
-    return render(
-        request, "medium_priority_tasks.html", {"tasks": medium_priority_tasks}
-    )
-
-
-def low_priority_tasks(request):
-    user_logged_in = request.user
-
-    all_low_priority_tasks = Task.objects.filter(priority="Low")
-    low_priority_tasks = []
-
-    for task in all_low_priority_tasks:
-        if (
-            user_logged_in in task.user_assigned.all()
-            or user_logged_in == task.task_owner
-        ):
-            low_priority_tasks.append(task)
-
-    return render(request, "low_priority_tasks.html", {"tasks": low_priority_tasks})
 
 
 def add_comment(request, task_id):
