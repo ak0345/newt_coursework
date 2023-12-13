@@ -327,8 +327,6 @@ def dashboard(request):
     
     all_teams = Team.objects.all()
 
-    tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
-
     if request.method == "POST":
         option_picked = request.POST.get("filter_tasks")
         if option_picked == "toggle_low_priority":
@@ -367,6 +365,7 @@ def dashboard(request):
         if option_picked == "toggle_simplified":
             display_tasks_settings['simplified_view'] = not display_tasks_settings['simplified_view']
 
+
     if display_tasks_settings['show_not_started_first']:
         status_order = Case(
         When(status="Not Started", then=Value(1)),
@@ -376,13 +375,13 @@ def dashboard(request):
         tasks = Task.objects.alias(status_order=status_order).order_by("status_order", "status")
     if display_tasks_settings['show_low_priority_first']:
         priority_order = Case(
-        When(priority="High", then=Value(1)),
+        When(priority="High", then=Value(3)),
         When(priority="Medium", then=Value(2)),
-        When(priority="Low", then=Value(3)),
+        When(priority="Low", then=Value(1)),
         )
         tasks = Task.objects.alias(priority_order=priority_order).order_by("priority_order", "priority")
     if display_tasks_settings['show_oldest_first']:
-        tasks = tasks.order_by('creation_date')
+        tasks = Task.objects.order_by('creation_date')
         
     
     if display_tasks_settings['show_low'] == False:
@@ -391,8 +390,6 @@ def dashboard(request):
             tasks = tasks.exclude(priority="Medium")
     if display_tasks_settings['show_high'] == False:
             tasks = tasks.exclude(priority="High")
-    #if display_tasks_settings['show_low'] == False and display_tasks_settings['show_medium'] == False and display_tasks_settings['show_high'] == False:
-            #tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
     if display_tasks_settings['show_not_started'] == False:
             tasks = tasks.exclude(status="Not Started")
     if display_tasks_settings['show_in_progress'] == False:
