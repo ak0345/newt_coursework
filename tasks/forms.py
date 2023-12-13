@@ -63,16 +63,6 @@ class TaskForm(forms.ModelForm):
         model = Task
         exclude = ["task_owner",  "task_complete", "completion_time", "status"]
 
-    def save(self, user, commit=True):
-
-        new_task = super(TaskForm, self).save(commit=False)
-        new_task.task_owner = user
-
-
-        new_task.save()
-
-        return new_task
-
     def set_team_assigned_queryset(self, user):
         self.fields['team_assigned'].queryset = Team.objects.filter(Q(team_owner=user) | Q(users_in_team=user) )
 
@@ -82,16 +72,6 @@ class EditTaskForm(forms.ModelForm):
     class Meta:
         model = Task
         exclude = ["task_owner",  "task_complete", "completion_time", "status"]
-
-    def save(self, user, commit=True):
-
-        new_task = super(TaskForm, self).save(commit=False)
-        new_task.task_owner = user
-
-
-        new_task.save()
-
-        return new_task
 
     def set_team_assigned_queryset(self, user):
         self.fields['team_assigned'].queryset = Team.objects.filter(Q(team_owner=user) | Q(users_in_team=user))

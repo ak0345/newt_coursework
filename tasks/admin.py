@@ -65,15 +65,23 @@ class TeamAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    search_fields = ("task_owner__username", "task_heading", )
+    search_fields = ("task_owner__username", "user_assigned__username", "task_heading", )
     list_display = [
         "id",
         "task_heading",
         "creation_date",
         "last_modified",
         "task_owner",
-        "task_complete",
+        "user_assigned_to_task",
+        "priority",
+        "status",
     ]
+
+    def user_assigned_to_task(self, obj):
+        usernames_out = []
+        for username_obj in obj.user_assigned.all():
+            usernames_out.append(username_obj.username)
+        return usernames_out if usernames_out else "None"
     
     
 @admin.register(Comment)

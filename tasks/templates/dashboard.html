@@ -220,9 +220,14 @@
                 </div>
             <div class="p-0">
               <p class="mt-2 px-2">{{ task.task_description }}</p>
-              
               <small class="row text-muted mt-0 p-2 ">
-                <strong class="">Assigned To:</strong> {{ task.user_assigned.all|join:', ' }}
+                <strong class="">Assigned To:</strong> <p>{{ task.user_assigned.all|join:', ' }}</p>
+              </small>
+              <small class="row mt-0 p-2 ">
+                <p>Created On: {{task.creation_date}}</p>
+              </small>
+              <small class="row mt-0 p-2 ">
+                <p>Last Modified On: {{task.last_modified}}</p>
               </small>
               {% if not display_tasks_settings.simplified_view %}
               <form method="post" action="{% url 'add_comment' task.id %}" class="row mb-2 h-auto mt-1 px-4 comment-form">
@@ -235,7 +240,7 @@
                 <div class="row rounded px-4">
                   {% for comment in task.comment_set.all %}
                     <span class="text-wrap text-break">
-                      <small>{{ comment.Commentor.username }}: {{ comment.text }}</small>
+                      <small>{{ comment.Commentor.username }} on {{comment.created_at.date}} at {{comment.created_at.time}}: {{ comment.text }}</small>
                       <small class="text-muted"></small>
                     </span>
                   {% empty %}

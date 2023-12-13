@@ -55,7 +55,7 @@ class Command(BaseCommand):
     }
 
     USER_COUNT = 100
-    DEFAULT_PASSWORD = "Password123"
+    DEFAULT_PASSWORD = "Dummy123"
     TASK_COUNT = 200
     TEAM_COUNT = 50
     COMMENT_COUNT = 400
@@ -132,15 +132,17 @@ class Command(BaseCommand):
             unique_identifier=unique_identifier,
         )
 
-        team.users_in_team.set(choices(User.objects.all(), k=randint(2, 5)))
+        team.users_in_team.set(choices(User.objects.exclude(username=team_owner.username), k=randint(2, 5)))
 
     def create_team(self, users):
+        team_owner = choice(users)
         team = Team.objects.create(
             team_name=self.team_fixture["team_name"],
             description=self.team_fixture["description"],
-            team_owner=choice(users),
+            team_owner=team_owner,
             unique_identifier=self.team_fixture["unique_identifier"],
         )
+        users.remove(team_owner)
         team.users_in_team.set(users)
 
     def create_comments(self):
