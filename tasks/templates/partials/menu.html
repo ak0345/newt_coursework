@@ -17,7 +17,7 @@
             type="text"
             class="form-control"
             id="input_everything_name"
-            placeholder="Search for a #team or @username here"
+            placeholder="Search for a #team, task, or @username here"
             aria-label="Search Everything"
             aria-describedby="basic-addon1"
             name="everythingsearched"
@@ -30,28 +30,25 @@
 
   <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
     <li class="nav-item dropdown">
-      <div class="row">
-        <a
-          class="nav-link"
-          href="#"
-          id="user-account-dropdown"
-          role="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          {% if user.gravatar_url != null %}
-          <img
-            src="{{ user.gravatar }}"
-            alt="User's Gravatar"
-            class="rounded-circle mx-auto d-block"
-            width="24rem"
-          />
-          {% else %}
-          <span class="bi-person-circle"></span>
-          {% endif %}
-        </a>
-      </div>
-
+      <a
+        class="nav-link"
+        href="#"
+        id="user-account-dropdown"
+        role="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        {% if user.gravatar_url != null %}
+        <img
+          src="{{ user.gravatar }}"
+          alt="User's Gravatar"
+          class="rounded-circle mx-auto d-block"
+          width="24rem"
+        />
+        {% else %}
+        <span class="bi-person-circle"></span>
+        {% endif %}
+      </a>
       <ul
         class="dropdown-menu dropdown-menu-end"
         aria-labelledby="user-account-dropdown"
