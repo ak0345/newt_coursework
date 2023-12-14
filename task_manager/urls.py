@@ -72,4 +72,5 @@ urlpatterns = [
     path("team_search/", views.lookup_team, name="lookup-team"),
     path("everything_search/", views.lookup_everything, name="lookup-everything"),
     path("leave_team/<int:team_id>/", views.leave_team, name="leave_team"),
+    path("user/", views.show_user_information, name="user_information"),
 ]

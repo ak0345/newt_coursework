@@ -23,6 +23,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     gravatar_url = models.URLField(max_length=255, blank=True, null=True)
+    points = models.IntegerField(default=0)
     email = models.EmailField(unique=True, blank=False)
 
     class Meta:
@@ -46,6 +47,11 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
 
         return self.gravatar(size=60)
+
+    def give_points(self, points):
+        self.points += points
+        self.save()
+
 
 def validate_future_date(value):
     if value < timezone.now():
@@ -134,7 +140,7 @@ class Team(models.Model):
         "User",
         on_delete=models.CASCADE,
         related_name="teams_owned",
-        default="default_owner",
+        null=False,
     )
 
     users_in_team = models.ManyToManyField(
@@ -158,18 +164,25 @@ class Team(models.Model):
     def __str__(self):
         return self.team_name
 
+    def calculate_team_points(self):
+        users_in_team = User.objects.filter(team=user)
+        team_points = sum(user.points for user in users_in_team)
+        self.points = team_points
+        self.save()
+
 
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now=True, blank=False)
-    Commentor = models.ForeignKey(User, on_delete=models.CASCADE, null=False, default = 1)  # New field for the commenter
-
+    Commentor = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=False, default=1
+    )  # New field for the commenter
 
     def comment_description(self):
         return f"Comment on {self.task.task_heading}"
 
-      
+
 class Invitation(models.Model):
     user_requesting_to_join = models.ForeignKey(
         "User",

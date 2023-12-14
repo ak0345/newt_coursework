@@ -1,7 +1,7 @@
 from django import forms
 from django.test import TestCase
 from tasks.forms import TeamCreationForm
-from tasks.models import Team
+from tasks.models import Team, User
 
 
 class TeamCreationFormTestCase(TestCase):
@@ -13,6 +13,9 @@ class TeamCreationFormTestCase(TestCase):
             "unique_identifier": "#Newt",
             "description": "This is a sample team.",
         }
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword"
+        )
 
     def test_form_has_necessary_fields(self):
         form = TeamCreationForm()
@@ -32,7 +35,7 @@ class TeamCreationFormTestCase(TestCase):
     def test_form_must_save_correctly(self):
         form = TeamCreationForm(data=self.form_input)
         before_count = Team.objects.count()
-        form.save()
+        form.save(user=self.user)
         after_count = Team.objects.count()
         self.assertEqual(
             after_count, before_count + 1

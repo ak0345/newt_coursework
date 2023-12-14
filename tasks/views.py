@@ -30,6 +30,8 @@ from django.forms.models import model_to_dict
 from datetime import datetime
 from django.utils import timezone
 from .models import Comment
+from django.db.models import Sum
+
 from django.db.models import Q
 
 
@@ -312,97 +314,134 @@ def invite_user(request, team_id, inviting_id):
 
 @login_required
 def dashboard(request):
-    display_tasks_settings = request.session.get('display_tasks_settings', {
-        'show_low': True,
-        'show_medium': True,
-        'show_high': True,
-        'show_not_started': True,
-        'show_in_progress': True,
-        'show_completed': True,
-        'show_oldest_first': True,
-        'show_low_priority_first': False,
-        'show_not_started_first': False,
-        'simplified_view': False,
-    })
-    
+    display_tasks_settings = request.session.get(
+        "display_tasks_settings",
+        {
+            "show_low": True,
+            "show_medium": True,
+            "show_high": True,
+            "show_not_started": True,
+            "show_in_progress": True,
+            "show_completed": True,
+            "show_oldest_first": True,
+            "show_low_priority_first": False,
+            "show_not_started_first": False,
+            "simplified_view": False,
+        },
+    )
+
     all_teams = Team.objects.all()
 
-    tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
+    tasks = Task.objects.filter(
+        Q(task_owner=request.user) | Q(user_assigned=request.user)
+    )
 
     if request.method == "POST":
         option_picked = request.POST.get("filter_tasks")
         if option_picked == "toggle_low_priority":
-            display_tasks_settings['show_low'] = not display_tasks_settings['show_low']
-        
-        if option_picked == "toggle_medium_priority":
-            display_tasks_settings['show_medium'] = not display_tasks_settings['show_medium']
-        
-        if option_picked == "toggle_high_priority":
-            display_tasks_settings['show_high'] = not display_tasks_settings['show_high']
-        
-        if option_picked == "toggle_not_started":
-            display_tasks_settings['show_not_started'] = not display_tasks_settings['show_not_started']
-        
-        if option_picked == "toggle_in_progress":
-            display_tasks_settings['show_in_progress'] = not display_tasks_settings['show_in_progress']
-        
-        if option_picked == "toggle_completed":
-            display_tasks_settings['show_completed'] = not display_tasks_settings['show_completed']
+            display_tasks_settings["show_low"] = not display_tasks_settings["show_low"]
 
-        if option_picked == "toggle_date" and display_tasks_settings['show_oldest_first'] != True:
-            display_tasks_settings['show_oldest_first'] = True
-            display_tasks_settings['show_low_priority_first'] = False
-            display_tasks_settings['show_not_started_first'] = False
-        
-        if option_picked == "toggle_priority" and display_tasks_settings['show_low_priority_first'] != True:
-            display_tasks_settings['show_low_priority_first'] = True
-            display_tasks_settings['show_not_started_first'] = False
-            display_tasks_settings['show_oldest_first'] = False
-        
-        if option_picked == "toggle_status" and display_tasks_settings['show_not_started_first'] != True:
-            display_tasks_settings['show_not_started_first'] = True
-            display_tasks_settings['show_low_priority_first'] = False
-            display_tasks_settings['show_oldest_first'] = False
+        if option_picked == "toggle_medium_priority":
+            display_tasks_settings["show_medium"] = not display_tasks_settings[
+                "show_medium"
+            ]
+
+        if option_picked == "toggle_high_priority":
+            display_tasks_settings["show_high"] = not display_tasks_settings[
+                "show_high"
+            ]
+
+        if option_picked == "toggle_not_started":
+            display_tasks_settings["show_not_started"] = not display_tasks_settings[
+                "show_not_started"
+            ]
+
+        if option_picked == "toggle_in_progress":
+            display_tasks_settings["show_in_progress"] = not display_tasks_settings[
+                "show_in_progress"
+            ]
+
+        if option_picked == "toggle_completed":
+            display_tasks_settings["show_completed"] = not display_tasks_settings[
+                "show_completed"
+            ]
+
+        if (
+            option_picked == "toggle_date"
+            and display_tasks_settings["show_oldest_first"] != True
+        ):
+            display_tasks_settings["show_oldest_first"] = True
+            display_tasks_settings["show_low_priority_first"] = False
+            display_tasks_settings["show_not_started_first"] = False
+
+        if (
+            option_picked == "toggle_priority"
+            and display_tasks_settings["show_low_priority_first"] != True
+        ):
+            display_tasks_settings["show_low_priority_first"] = True
+            display_tasks_settings["show_not_started_first"] = False
+            display_tasks_settings["show_oldest_first"] = False
+
+        if (
+            option_picked == "toggle_status"
+            and display_tasks_settings["show_not_started_first"] != True
+        ):
+            display_tasks_settings["show_not_started_first"] = True
+            display_tasks_settings["show_low_priority_first"] = False
+            display_tasks_settings["show_oldest_first"] = False
 
         if option_picked == "toggle_simplified":
-            display_tasks_settings['simplified_view'] = not display_tasks_settings['simplified_view']
+            display_tasks_settings["simplified_view"] = not display_tasks_settings[
+                "simplified_view"
+            ]
 
-    if display_tasks_settings['show_not_started_first']:
+    if display_tasks_settings["show_not_started_first"]:
         status_order = Case(
-        When(status="Not Started", then=Value(1)),
-        When(status="In Progress", then=Value(2)),
-        When(status="Completed", then=Value(3)),
+            When(status="Not Started", then=Value(1)),
+            When(status="In Progress", then=Value(2)),
+            When(status="Completed", then=Value(3)),
         )
-        tasks = Task.objects.alias(status_order=status_order).order_by("status_order", "status")
-    if display_tasks_settings['show_low_priority_first']:
+        tasks = Task.objects.alias(status_order=status_order).order_by(
+            "status_order", "status"
+        )
+    if display_tasks_settings["show_low_priority_first"]:
         priority_order = Case(
-        When(priority="High", then=Value(1)),
-        When(priority="Medium", then=Value(2)),
-        When(priority="Low", then=Value(3)),
+            When(priority="High", then=Value(1)),
+            When(priority="Medium", then=Value(2)),
+            When(priority="Low", then=Value(3)),
         )
-        tasks = Task.objects.alias(priority_order=priority_order).order_by("priority_order", "priority")
-    if display_tasks_settings['show_oldest_first']:
-        tasks = tasks.order_by('creation_date')
-        
-    
-    if display_tasks_settings['show_low'] == False:
-            tasks = tasks.exclude(priority="Low")
-    if display_tasks_settings['show_medium'] == False:
-            tasks = tasks.exclude(priority="Medium")
-    if display_tasks_settings['show_high'] == False:
-            tasks = tasks.exclude(priority="High")
-    #if display_tasks_settings['show_low'] == False and display_tasks_settings['show_medium'] == False and display_tasks_settings['show_high'] == False:
-            #tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
-    if display_tasks_settings['show_not_started'] == False:
-            tasks = tasks.exclude(status="Not Started")
-    if display_tasks_settings['show_in_progress'] == False:
-            tasks = tasks.exclude(status="In Progress")
-    if display_tasks_settings['show_completed'] == False:
-            tasks = tasks.exclude(status="Completed")
+        tasks = Task.objects.alias(priority_order=priority_order).order_by(
+            "priority_order", "priority"
+        )
+    if display_tasks_settings["show_oldest_first"]:
+        tasks = tasks.order_by("creation_date")
 
-    request.session['display_tasks_settings'] = display_tasks_settings
+    if display_tasks_settings["show_low"] == False:
+        tasks = tasks.exclude(priority="Low")
+    if display_tasks_settings["show_medium"] == False:
+        tasks = tasks.exclude(priority="Medium")
+    if display_tasks_settings["show_high"] == False:
+        tasks = tasks.exclude(priority="High")
+    # if display_tasks_settings['show_low'] == False and display_tasks_settings['show_medium'] == False and display_tasks_settings['show_high'] == False:
+    # tasks = Task.objects.filter(Q(task_owner=request.user) | Q(user_assigned=request.user))
+    if display_tasks_settings["show_not_started"] == False:
+        tasks = tasks.exclude(status="Not Started")
+    if display_tasks_settings["show_in_progress"] == False:
+        tasks = tasks.exclude(status="In Progress")
+    if display_tasks_settings["show_completed"] == False:
+        tasks = tasks.exclude(status="Completed")
 
-    return render(request, "dashboard.html", {"tasks": tasks, "all_teams": all_teams, "display_tasks_settings": display_tasks_settings})
+    request.session["display_tasks_settings"] = display_tasks_settings
+
+    return render(
+        request,
+        "dashboard.html",
+        {
+            "tasks": tasks,
+            "all_teams": all_teams,
+            "display_tasks_settings": display_tasks_settings,
+        },
+    )
 
 
 from django.shortcuts import render, redirect
@@ -488,15 +527,30 @@ def show_task_details(request, task_id):
 
 def update_task_status(request, task_id):
     task = Task.objects.get(id=task_id)
+
     if request.method == "POST":
         new_status = request.POST.get("new_status")
         if new_status == "Completed":
-            task.task_complete = True
-            task.completion_time = timezone.now()
+            if task.status != "Completed":
+                task.status = "Completed"
+                task.task_complete = True
+                task.completion_time = timezone.now()
+
+                task_owner = task.task_owner
+                task_owner.points += 10
+                task_owner.save()
+
         else:
-            task.task_complete = False
-            task.completion_time = None
-        task.status = new_status
+            if task.status == "Completed":
+                task.status = "In Progress"
+                task.task_complete = False
+                task.completion_time = None
+
+                task_owner = task.task_owner
+                if task_owner.points >= 10:
+                    task_owner.points -= 10
+                    task_owner.save()
+
         task.save()
         return redirect("dashboard")
 
@@ -563,3 +617,24 @@ def add_comment(request, task_id):
         return redirect(request.META["HTTP_REFERER"])
     else:
         pass
+
+
+def team_points(request, team_id):
+    team = Team.objects.get(id=team_id)
+    return render(request, "user_info.html", {"team": team})
+
+
+def show_user_information(request):
+    user = request.user
+    teams = Team.objects.filter(team_owner=user) | Team.objects.filter(
+        users_in_team=user
+    )
+    team_points = {}
+    for team in teams:
+        total_points = (
+            team.users_in_team.aggregate(total_points=Sum("points"))["total_points"]
+            or 0
+        )
+        team_points[team] = total_points
+
+    return render(request, "user_info.html", {"user": user, "team_points": team_points})
