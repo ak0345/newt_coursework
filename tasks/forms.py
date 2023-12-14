@@ -32,6 +32,7 @@ class InvitationForm(forms.ModelForm):
         new_invitation.save()
         return new_invitation
 
+
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
 
@@ -52,29 +53,30 @@ class LogInForm(forms.Form):
 from django import forms
 from .models import Task, Team
 
-class TaskForm(forms.ModelForm):
-    #priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES)
-    #team_assigned = forms.ModelChoiceField(queryset=Team.objects.all(), to_field_name="unique_identifier", empty_label='None')
-    #user_assigned = forms.ModelMultipleChoiceField(
-        #queryset=User.objects.all() if team_assigned == 'None' else Team.objects.filter(unique_identifier=team_assigned).values(),
-    #)
 
+class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        exclude = ["task_owner",  "task_complete", "completion_time", "status"]
+        exclude = ["task_owner", "task_complete", "completion_time", "status"]
+
+    if User is None:
+        raise ValueError("A user must be provided to create a task.")
 
     def set_team_assigned_queryset(self, user):
-        self.fields['team_assigned'].queryset = Team.objects.filter(Q(team_owner=user) | Q(users_in_team=user) )
-
+        self.fields["team_assigned"].queryset = Team.objects.filter(
+            Q(team_owner=user) | Q(users_in_team=user)
+        )
 
 
 class EditTaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        exclude = ["task_owner",  "task_complete", "completion_time", "status"]
+        exclude = ["task_owner", "task_complete", "completion_time", "status"]
 
     def set_team_assigned_queryset(self, user):
-        self.fields['team_assigned'].queryset = Team.objects.filter(Q(team_owner=user) | Q(users_in_team=user))
+        self.fields["team_assigned"].queryset = Team.objects.filter(
+            Q(team_owner=user) | Q(users_in_team=user)
+        )
 
 
 class UserForm(forms.ModelForm):
@@ -180,6 +182,9 @@ class TeamCreationForm(forms.ModelForm):
 
     def save(self, user, commit=True):
         """Create a new team or update an existing team."""
+        if not self.is_valid():
+            raise ValueError("Form data is not valid")
+
         new_team = Team(
             team_name=self.cleaned_data["team_name"],
             unique_identifier=self.cleaned_data["unique_identifier"],
