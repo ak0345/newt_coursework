@@ -87,8 +87,8 @@ class Command(BaseCommand):
         print("Task seeding complete.      ")
 
     def generate_task(self):
-        task_heading = self.faker.sentence()
-        task_description = self.faker.text()
+        task_heading = self.faker.sentence()[:50]
+        task_description = self.faker.text()[:160]
         team_assigned = choice(Team.objects.all())
         task_owner = choice(team_assigned.users_in_team.all()) #selects a owner from assigned team
         deadline_date = self.faker.date_time_this_month(tzinfo=pytz.UTC, before_now=True, after_now=True)
@@ -120,8 +120,8 @@ class Command(BaseCommand):
         print("Team seeding complete.      ")
 
     def generate_team(self):
-        team_name = self.faker.word()
-        description = self.faker.text()
+        team_name = self.faker.word()[:50]
+        description = self.faker.text()[:160]
         team_owner = choice(User.objects.all())
         unique_identifier = "#" + self.faker.unique.word() + f"{randint(1,1000)}"
 

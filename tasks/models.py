@@ -95,9 +95,9 @@ class Task(models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
-    creation_date = models.DateTimeField(auto_now=True, blank=False)
-    last_modified = models.DateTimeField(auto_now_add=True, blank=False)
-    deadline_date = models.DateTimeField(null=True, blank=True)
+    creation_date = models.DateTimeField(auto_now_add=True, blank=False)
+    last_modified = models.DateTimeField(auto_now=True, blank=False)
+    deadline_date = models.DateTimeField(null=True, blank=True, validators=[validate_future_date])
     task_complete = models.BooleanField(default=False)
     completion_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
@@ -148,8 +148,8 @@ class Team(models.Model):
         blank=True
         # validators = [check_users_team] - this may need to be updated / a new one made
     )
-    creation_date = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
     unique_identifier = models.CharField(
         max_length=50,
         unique=True,

@@ -52,6 +52,7 @@ class TeamAdmin(admin.ModelAdmin):
         "description",
         "team_owner",
         "users_in_team_list",
+        "owned_tasks",
         "creation_date",
         "last_modified",
     ]
@@ -62,10 +63,17 @@ class TeamAdmin(admin.ModelAdmin):
             usernames_out.append(username_obj.username)
         return usernames_out if usernames_out else "None"
 
+    def owned_tasks(self, obj):
+        task_ids = Task.objects.filter(team_assigned=obj).values_list('id', flat=True)
+        tasks = []
+        for task_id in task_ids:
+            tasks.append(task_id)
+        return tasks if tasks else "None"
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    search_fields = ("task_owner__username", "user_assigned__username", "task_heading", )
+    search_fields = ("id", "task_owner__username", "user_assigned__username", "task_heading", )
     list_display = [
         "id",
         "task_heading",
