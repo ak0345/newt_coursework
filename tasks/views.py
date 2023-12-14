@@ -631,10 +631,14 @@ def show_user_information(request):
     )
     team_points = {}
     for team in teams:
-        total_points = (
-            team.users_in_team.aggregate(total_points=Sum("points"))["total_points"]
-            or 0
-        )
-        team_points[team] = total_points
+        users_in_team = team.users_in_team.all()
+        total_points = 0
 
+        current_user_in_team = users_in_team.count()
+        index = 0
+        while index < current_user_in_team:
+            total_points += users_in_team[index].points
+            index += 1
+
+        team_points[team] = total_points
     return render(request, "user_info.html", {"user": user, "team_points": team_points})
