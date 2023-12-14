@@ -1,0 +1,36 @@
+{% extends 'base_content.html' %}
+
+{% block content %}
+<div class="container">
+  <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
+  <div class="row">
+    <div class="col mt-4">
+      <h4>{{ user.username }}</h4>
+      <p>First name: {{ user.first_name }}</p>
+      <p>Last name: {{ user.last_name }}</p>
+      <p>Email: {{ user.email }}</p>
+
+      <h4>Your Teams </h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Team Name</th>
+            <th>Team Owner</th>
+            <th>Team Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for team, points in team_points.items %}
+            <tr>
+              <td>{{ team.team_name }}</td>
+              <td>{{ team.team_owner.username }}</td>
+              <td>{{ points }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h5>Individual Points Earned: {{ user.points }}</h5>
+    </div>
+  </div>
+</div>
+{% endblock %}
