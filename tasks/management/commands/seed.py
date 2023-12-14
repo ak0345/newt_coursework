@@ -55,7 +55,7 @@ class Command(BaseCommand):
     }
 
     USER_COUNT = 100
-    DEFAULT_PASSWORD = "Dummy123"
+    DEFAULT_PASSWORD = "Password123"
     TASK_COUNT = 200
     TEAM_COUNT = 50
     COMMENT_COUNT = 400
@@ -66,14 +66,12 @@ class Command(BaseCommand):
         self.faker = Faker("en_GB")
 
     def handle(self, *args, **options):
-        self.create_users()
-        self.create_teams()
-
         if not User.objects.filter(username__in=[users_in_fixture["username"] for users_in_fixture in user_fixtures]).exists():
             for user in user_fixtures:
                     self.user_fixtures_obj.append(self.create_user(user))
             self.create_team(self.user_fixtures_obj)
-
+        self.create_users()
+        self.create_teams()
         self.create_tasks()
         self.create_invitations()
         self.create_comments()
@@ -89,9 +87,15 @@ class Command(BaseCommand):
     def generate_task(self):
         task_heading = self.faker.sentence()[:50]
         task_description = self.faker.text()[:160]
-        team_assigned = choice(Team.objects.all())
-        task_owner = choice(team_assigned.users_in_team.all()) #selects a owner from assigned team
-        deadline_date = self.faker.date_time_this_month(tzinfo=pytz.UTC, before_now=True, after_now=True)
+        teams = list(Team.objects.all())
+        teams.append(None)
+        team_assigned = choice(teams)
+        if team_assigned:
+            task_owner = choice(team_assigned.users_in_team.all())
+        else:
+            task_owner = choice(User.objects.all())
+        creation_date = self.faker.date_time_this_month(tzinfo=pytz.UTC, before_now=True, after_now=False)
+        deadline_date = self.faker.date_time_this_month(tzinfo=pytz.UTC, before_now=False, after_now=True)
         task_complete = self.faker.boolean()
         completion_time = self.faker.date_time_this_month(tzinfo=pytz.UTC)
         status = choice([choice[0] for choice in Task.STATUS_CHOICES])
@@ -102,14 +106,26 @@ class Command(BaseCommand):
             task_description=task_description,
             team_assigned=team_assigned,
             task_owner=task_owner,
+            creation_date=creation_date,
             deadline_date=deadline_date,
             task_complete=task_complete,
             completion_time=completion_time,
             status=status,
             priority=priority,
         )
+        if team_assigned:
+            task.user_assigned.set(choices(team_assigned.users_in_team.all(), k=randint(2, 5)))
 
-        task.user_assigned.set(choices(team_assigned.users_in_team.all(), k=randint(2, 5)))
+        # Update points for the task owner
+        self.update_user_points(task_owner, task)
+        for assigned_user in task.user_assigned.all():
+            if assigned_user.id != task_owner.id:
+                self.update_user_points(assigned_user, task)
+
+    def update_user_points(self, user, task):
+        if task.status == "Completed":
+            user.points += 10
+            user.save()
 
     def create_teams(self):
         team_count = Team.objects.count()
@@ -156,7 +172,10 @@ class Command(BaseCommand):
     def generate_comment(self):
         task = choice(Task.objects.all())
         text = self.faker.text()
-        commentor = choice(task.team_assigned.users_in_team.all())
+        if task.team_assigned:
+            commentor = choice(task.team_assigned.users_in_team.all())
+        else:
+            commentor = task.task_owner
 
         Comment.objects.create(
             task=task,

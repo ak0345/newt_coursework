@@ -83,7 +83,7 @@ class Task(models.Model):
     team_assigned = models.ForeignKey(
         "Team",
         on_delete=models.CASCADE,
-        related_name="team_assigned_tasks",
+        related_name="team_assigned_tasks", null=True, blank=True
     )
     task_owner = models.ForeignKey(
         "User",
@@ -165,10 +165,9 @@ class Team(models.Model):
         return self.team_name
 
     def calculate_team_points(self):
-        users_in_team = User.objects.filter(team=user)
-        team_points = sum(user.points for user in users_in_team)
-        self.points = team_points
-        self.save()
+        team_members = self.users_in_team
+        team_points = sum(user.points for user in team_members.all())
+        return team_points
 
 
 class Comment(models.Model):
