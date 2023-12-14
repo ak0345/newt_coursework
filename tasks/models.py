@@ -91,7 +91,7 @@ class Task(models.Model):
     )
     creation_date = models.DateTimeField(auto_now_add=True, blank=False)
     last_modified = models.DateTimeField(auto_now=True, blank=False)
-    deadline_date = models.DateTimeField(null=True, blank=True)
+    deadline_date = models.DateTimeField(null=True, blank=True, validators=[validate_future_date])
     task_complete = models.BooleanField(default=False)
     completion_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
