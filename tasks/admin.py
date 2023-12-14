@@ -12,6 +12,7 @@ class UserAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "email",
+        "points",
         "owned_teams",
         "owned_task_ids",
         "team_memberships",
@@ -50,6 +51,7 @@ class TeamAdmin(admin.ModelAdmin):
         "unique_identifier",
         "team_name",
         "description",
+        "points",
         "team_owner",
         "users_in_team_list",
         "owned_tasks",
@@ -69,6 +71,13 @@ class TeamAdmin(admin.ModelAdmin):
         for task_id in task_ids:
             tasks.append(task_id)
         return tasks if tasks else "None"
+    
+    def points(self, obj):
+        total_points = 0
+        total_points += obj.team_owner.points
+        for user in obj.users_in_team.all():
+            total_points += user.points
+        return total_points
 
 
 @admin.register(Task)
@@ -81,6 +90,7 @@ class TaskAdmin(admin.ModelAdmin):
         "last_modified",
         "task_owner",
         "user_assigned_to_task",
+        "team_assigned",
         "priority",
         "status",
     ]

@@ -1,6 +1,4 @@
-{% extends 'base_content.html' %}
-
-{% block content %}
+{% extends 'base_content.html' %} {% block content %}
 <div class="container">
   <a class="mt-4 text-dark" href="{% url 'dashboard' %}">Back to Dashboard</a>
   <div class="row">
@@ -10,7 +8,7 @@
       <p>Last name: {{ user.last_name }}</p>
       <p>Email: {{ user.email }}</p>
 
-      <h4>Your Teams </h4>
+      <h4>Your Teams</h4>
       <table class="table">
         <thead>
           <tr>
@@ -21,11 +19,11 @@
         </thead>
         <tbody>
           {% for team, points in team_points.items %}
-            <tr>
-              <td>{{ team.team_name }}</td>
-              <td>{{ team.team_owner.username }}</td>
-              <td>{{ points }}</td>
-            </tr>
+          <tr>
+            <td>{{ team.team_name }}</td>
+            <td>{{ team.team_owner.username }}</td>
+            <td>{{ team.calculate_team_points }}</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
