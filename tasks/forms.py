@@ -59,9 +59,6 @@ class TaskForm(forms.ModelForm):
         model = Task
         exclude = ["task_owner", "task_complete", "completion_time", "status"]
 
-    if User is None:
-        raise ValueError("A user must be provided to create a task.")
-
     def set_team_assigned_queryset(self, user):
         self.fields["team_assigned"].queryset = Team.objects.filter(
             Q(team_owner=user) | Q(users_in_team=user)

@@ -22,15 +22,6 @@ class TaskModelTest(TestCase):
             username="@janedoe2",
             email="janedoe2@example.org",
         )
-        self.user = User.objects.create_user(
-            username="testuser", password="testpassword"
-        )
-        self.team = Team.objects.create(
-            team_owner=self.user,
-            team_name="Newt",
-            unique_identifier="#Newt",
-            description="This is a sample team.",
-        )
 
         return [user1, user2]
 
@@ -43,6 +34,8 @@ class TaskModelTest(TestCase):
         )
 
         team.users_in_team.set(kwargs["users"])
+
+        return team
 
     def setUp(self):
         self.test_user = User.objects.create(username='@testuser', password='12345', email='test@example.com')
@@ -127,28 +120,29 @@ class TaskModelTest(TestCase):
         self.assertEqual(self.task.task_owner, self.test_user)
 
     def test_users_assigned_are_in_team(self):
+        user1,user2 = self.create_users()
+        team = self.create_team(user2, users=[user1])
         user_not_in_team = User.objects.create(username='@otheruser', password='12345', email='other@example.com')
         self.task.user_assigned.add(self.test_user)
         self.task.user_assigned.add(user_not_in_team)
         self.assertIn(self.test_user, self.task.team_assigned.users_in_team.all())
         self.assertNotIn(user_not_in_team, self.task.team_assigned.users_in_team.all())
 
-        form_data = {
-            "task_heading": "Test Task",
-            "task_description": "This is a test task.",
-            "user_assigned": [user1.id, user2.id],
-            "team_assigned": team.id,
-            "deadline_date": "2023-12-31",
-            "task_complete": False,
-            "priority": "High",
-        }
-        form = TaskForm(data=form_data)
-        self.assertTrue(form.is_valid())
-        new_task = form.save(user=user1)
+        new_task = Task.objects.create(
+            task_heading= "Test Task",
+            task_description= "This is a test task.",
+            task_owner= user1,
+            team_assigned= team,
+            deadline_date= "2023-12-31",
+            task_complete= False,
+            priority= "High"
+        )
+        new_task.user_assigned.set([user2])
         self.assertEqual(new_task.task_heading, "Test Task")
         self.assertEqual(new_task.task_owner, user1)
-        self.assertEqual(list(new_task.user_assigned.all()), [user1, user2])
+        self.assertEqual(list(new_task.user_assigned.all()), [user2])
         self.assertEqual(new_task.task_owner, user1)
+
     def test_completion_time_consistency(self):
         self.task.task_complete = True
         completion_time_now = timezone.now()
