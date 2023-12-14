@@ -165,8 +165,9 @@ class Team(models.Model):
         return self.team_name
 
     def calculate_team_points(self):
-        team_members = self.users_in_team
-        team_points = sum(user.points for user in team_members.all())
+        team_members = list(self.users_in_team.values_list("points",flat=True))
+        team_members.append(self.team_owner.points)
+        team_points = sum(points for points in team_members)
         return team_points
 
 

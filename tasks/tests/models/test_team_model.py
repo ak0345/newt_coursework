@@ -1,16 +1,42 @@
 """Unit tests for the Team model."""
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from tasks.models import Team
+from tasks.models import Team, User
+from django.utils import timezone
 
 
 class TeamModelTestCase(TestCase):
-    fixtures = ["tasks/tests/fixtures/other_users.json"]
+    #fixtures = ["tasks/tests/fixtures/other_users.json"]
 
     def setUp(self):
-        self.team = Team.objects.get(
-            team_name="Newt"
-        )  # Replace with appropriate team name from fixtures
+        self.user1 = User.objects.create(
+            username='@testuser',
+            first_name='Test',
+            last_name='User',
+            email='test@example.com'
+        )
+        self.user2 = User.objects.create(
+            username='@testuser2',
+            first_name='Test',
+            last_name='User',
+            email='test2@example.com'
+        )
+        self.user3 = User.objects.create(
+            username='@testuser3',
+            first_name='Test',
+            last_name='User',
+            email='test3@example.com'
+        )
+
+        # Create a test team with the test user as the team owner
+        self.team = Team.objects.create(
+            team_name='Test Team',
+            description='Team description',
+            team_owner=self.user1,
+            unique_identifier='#abc123',
+            creation_date=timezone.now()
+        )
+        self.team.users_in_team.set([self.user2,self.user3])
 
     def test_valid_team_creation(self):
         self._assert_team_is_valid()
@@ -72,3 +98,19 @@ class TeamModelTestCase(TestCase):
     def _assert_team_is_invalid(self):
         with self.assertRaises(ValidationError):
             self.team.full_clean()
+    
+    def test_calculate_team_points(self):
+        # Create a team with the user as the team owner
+        test_team = self.team
+
+        # Add some points to the user and include the user in the team
+        self.user1.points += 50
+        test_team.users_in_team.set([self.user2, self.user3])
+
+        # Calculate team points and assert that it's correct
+        calculated_points = test_team.calculate_team_points()
+        expected_points = self.user1.points
+        for user in test_team.users_in_team.all():
+            expected_points+=user.points
+        self.assertEqual(calculated_points, expected_points)
+        
