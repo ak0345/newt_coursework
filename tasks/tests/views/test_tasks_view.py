@@ -5,8 +5,8 @@ from django.urls import reverse
 from tasks.models import User, Task, Team
 from django.utils import timezone
 
-class TaskViewTest(TestCase):
 
+class TaskViewTest(TestCase):
     def create_users(self):
         user1 = User.objects.create(
             first_name='Jane',
@@ -41,9 +41,9 @@ class TaskViewTest(TestCase):
 
         self.client.login(username=user1.username, password='password123')  # Use the password
 
-        response = self.client.get('/create_task/')
+        response = self.client.get("/create_task/")
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'create_task.html')
+        self.assertTemplateUsed(response, "create_task.html")
 
     def test_create_task_view_post(self):
         user1, user2 = self.create_users()
