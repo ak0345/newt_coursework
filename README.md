@@ -15,7 +15,7 @@ The project is called `task_manager`. It currently consists of a single app `tas
 
 ## Deployed version of the application
 
-The deployed version of the application can be found at [http://ak0345.pythonanywhere.com/dashboard/](http://ak0345.pythonanywhere.com/dashboard/).
+The deployed version of the application can be found at [http://ak0345.pythonanywhere.com](http://ak0345.pythonanywhere.com).
 
 ## Installation instructions
 
