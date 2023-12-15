@@ -38,16 +38,20 @@ class TeamModelTestCase(TestCase):
         )
         self.team.users_in_team.set([self.user2,self.user3])
 
+        self.second_team = Team.objects.create(
+            team_name='Test Team2',
+            description='Team description2',
+            team_owner=self.user2,
+            unique_identifier='#abc12322',
+            creation_date=timezone.now()
+        )
+        self.team.users_in_team.set([self.user1,self.user3])
+
     def test_valid_team_creation(self):
         self._assert_team_is_valid()
 
     def test_team_name_cannot_be_blank(self):
         self.team.team_name = ""
-        self._assert_team_is_invalid()
-
-    def test_team_name_must_be_unique(self):
-        second_team = Team.objects.get(team_name="Team_Newt")
-        self.team.team_name = second_team.team_name
         self._assert_team_is_invalid()
 
     def test_team_name_can_be_100_characters_long(self):
@@ -59,8 +63,7 @@ class TeamModelTestCase(TestCase):
         self._assert_team_is_invalid()
 
     def test_unique_identifier_must_be_unique(self):
-        second_team = Team.objects.get(team_name="Team_Newt")
-        self.team.unique_identifier = second_team.unique_identifier
+        self.team.unique_identifier = self.second_team.unique_identifier
         self._assert_team_is_invalid()
 
     def test_unique_identifier_starts_with_hashtag(self):

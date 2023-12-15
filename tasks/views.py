@@ -290,6 +290,13 @@ def invite_user(request, team_id, inviting_id):
     form = InvitationForm()
     user = User.objects.get(username=username)
 
+    if user in Team.objects.get(id=team_id).users_in_team.all():
+        messages.info(
+            request,
+            "You are already part of the team.",
+        )
+        return redirect("show_team", team_id=team_id)
+
     invitations_with_team = Invitation.objects.filter(
         team_to_join=Team.objects.get(id=team_id)
     )
@@ -519,8 +526,23 @@ def edit_task(request, task_id):
     return render(request, "edit_task.html", {"form": form, "task": task})
 
 
+def remove_user_from_team(request, team_id, user_id):
+    team = Team.objects.get(id=team_id)
+    user_to_remove = User.objects.get(id=user_id)
+    if request.user == team.team_owner:
+        if user_to_remove in team.users_in_team.all():
+            team.users_in_team.remove(user_to_remove)
+            messages.success(
+                request, f"{user_to_remove.username} has been removed from the team."
+            )
+        else:
+            messages.error(
+                request, f"{user_to_remove.username} is not a member of this team."
+            )
+    else:
+        messages.error(request, "Only the team owner can remove members from the team.")
 
-
+    return redirect("team_management")
 
 def update_task_status(request, task_id):
     task = Task.objects.get(id=task_id)
