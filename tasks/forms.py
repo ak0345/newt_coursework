@@ -30,7 +30,8 @@ class InvitationForm(forms.ModelForm):
             team_to_join=team,
             user_creating_invitation=inviting,
         )
-        new_invitation.save()
+        if commit:
+            new_invitation.save()
         return new_invitation
 
 

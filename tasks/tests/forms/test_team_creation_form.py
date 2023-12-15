@@ -37,10 +37,23 @@ class TeamCreationFormTestCase(TestCase):
         before_count = Team.objects.count()
         form.save(user=self.user)
         after_count = Team.objects.count()
-        self.assertEqual(
-            after_count, before_count + 1
-        )  # Ensures a new team called  Newt is created
+        self.assertEqual(after_count, before_count + 1)
         new_team = Team.objects.last()
         self.assertEqual(new_team.team_name, "Newt")
         self.assertEqual(new_team.unique_identifier, "#Newt")
         self.assertEqual(new_team.description, "This is a sample team.")
+
+    def test_invalid_form_data(self):
+        invalid_data = {
+            "team_name": "",
+            "unique_identifier": "",
+            "description": "",
+        }
+
+        form = TeamCreationForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+
+        with self.assertRaises(ValueError) as context:
+            form.save(user=self.user)
+
+        self.assertEqual(str(context.exception), "Form data is not valid")

@@ -80,7 +80,6 @@ def home(request):
     return render(request, "home.html")
 
 
-@login_required
 def show_team(request, team_id):
     try:
         team = Team.objects.get(id=team_id)
@@ -286,7 +285,7 @@ def invite_user(request, team_id, inviting_id):
             request,
             "User does not exist.",
         )
-        return redirect(request.META["HTTP_REFERER"])
+        return redirect("show_team", team_id=team_id)
 
     form = InvitationForm()
     user = User.objects.get(username=username)
@@ -300,7 +299,7 @@ def invite_user(request, team_id, inviting_id):
                 request,
                 "Request already exists. Awaiting approval from team owner or user's notifications.",
             )
-        return redirect(request.META["HTTP_REFERER"])
+        return redirect("show_team", team_id=team_id)
 
     form.save(
         user=user,
@@ -311,7 +310,7 @@ def invite_user(request, team_id, inviting_id):
         request,
         f"Successfully invited user {username}",
     )
-    return redirect(request.META["HTTP_REFERER"])
+    return redirect("show_team", team_id=team_id)
 
 
 @login_required
@@ -397,7 +396,7 @@ def dashboard(request):
                 "simplified_view"
             ]
 
-    if display_tasks_settings['show_not_started_first']:
+    if display_tasks_settings["show_not_started_first"]:
         status_order = Case(
             When(status="Not Started", then=Value(1)),
             When(status="In Progress", then=Value(2)),
@@ -408,31 +407,40 @@ def dashboard(request):
         )
     if display_tasks_settings["show_low_priority_first"]:
         priority_order = Case(
-        When(priority="High", then=Value(3)),
-        When(priority="Medium", then=Value(2)),
-        When(priority="Low", then=Value(1)),
+            When(priority="High", then=Value(3)),
+            When(priority="Medium", then=Value(2)),
+            When(priority="Low", then=Value(1)),
         )
-        tasks = Task.objects.alias(priority_order=priority_order).order_by("priority_order", "priority")
-    if display_tasks_settings['show_oldest_first']:
-        tasks = Task.objects.order_by('creation_date')
-        
-    
-    if display_tasks_settings['show_low'] == False:
-            tasks = tasks.exclude(priority="Low")
-    if display_tasks_settings['show_medium'] == False:
-            tasks = tasks.exclude(priority="Medium")
-    if display_tasks_settings['show_high'] == False:
-            tasks = tasks.exclude(priority="High")
-    if display_tasks_settings['show_not_started'] == False:
-            tasks = tasks.exclude(status="Not Started")
-    if display_tasks_settings['show_in_progress'] == False:
-            tasks = tasks.exclude(status="In Progress")
-    if display_tasks_settings['show_completed'] == False:
-            tasks = tasks.exclude(status="Completed")
+        tasks = Task.objects.alias(priority_order=priority_order).order_by(
+            "priority_order", "priority"
+        )
+    if display_tasks_settings["show_oldest_first"]:
+        tasks = Task.objects.order_by("creation_date")
 
-    request.session['display_tasks_settings'] = display_tasks_settings
+    if display_tasks_settings["show_low"] == False:
+        tasks = tasks.exclude(priority="Low")
+    if display_tasks_settings["show_medium"] == False:
+        tasks = tasks.exclude(priority="Medium")
+    if display_tasks_settings["show_high"] == False:
+        tasks = tasks.exclude(priority="High")
+    if display_tasks_settings["show_not_started"] == False:
+        tasks = tasks.exclude(status="Not Started")
+    if display_tasks_settings["show_in_progress"] == False:
+        tasks = tasks.exclude(status="In Progress")
+    if display_tasks_settings["show_completed"] == False:
+        tasks = tasks.exclude(status="Completed")
 
-    return render(request, "dashboard.html", {"tasks": tasks, "all_teams": all_teams, "display_tasks_settings": display_tasks_settings})
+    request.session["display_tasks_settings"] = display_tasks_settings
+
+    return render(
+        request,
+        "dashboard.html",
+        {
+            "tasks": tasks,
+            "all_teams": all_teams,
+            "display_tasks_settings": display_tasks_settings,
+        },
+    )
 
 
 from django.shortcuts import render, redirect
@@ -561,21 +569,6 @@ def update_task_status(request, task_id):
         task.save()
         return redirect("dashboard")
 
-    return render(request, "update_task_status.html", {"task": task})
-
-
-def update_complete_status(request, task_id):
-    task = Task.objects.get(id=task_id)
-    if request.method == "POST":
-        new_status = request.POST.get("new_status")
-        if new_status == "Completed" and not task.task_complete:
-            task.task_complete = True
-            task.completion_time = timezone.now()
-        elif new_status != "Completed" and task.task_complete:
-            task.task_complete = False
-            task.completion_time = None
-        task.save()
-        return redirect("dashboard")
     return render(request, "dashboard.html", {"task": task})
 
 
@@ -615,7 +608,8 @@ def team_delete(request, team_id):
         return redirect("team_management")
     return render(request, "team_management.html", {"team": team})
 
-
+from django.shortcuts import redirect
+from django.http import HttpResponseNotFound
 def add_comment(request, task_id):
     if request.method == "POST":
         task = Task.objects.get(id=task_id)
@@ -624,11 +618,6 @@ def add_comment(request, task_id):
         return redirect(request.META["HTTP_REFERER"])
     else:
         pass
-
-
-def team_points(request, team_id):
-    team = Team.objects.get(id=team_id)
-    return render(request, "user_info.html", {"team": team})
 
 def show_user_information(request):
     user = request.user
