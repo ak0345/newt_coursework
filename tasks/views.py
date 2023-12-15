@@ -511,9 +511,7 @@ def edit_task(request, task_id):
     return render(request, "edit_task.html", {"form": form, "task": task})
 
 
-def show_task_details(request, task_id):
-    task = Task.objects.get(id=task_id)
-    return render(request, "show_task.html", {"task": task})
+
 
 
 def update_task_status(request, task_id):
