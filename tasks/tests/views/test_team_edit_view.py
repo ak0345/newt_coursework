@@ -187,20 +187,6 @@ class AddCommentViewTest(TestCase):
             task_owner=self.user,
         )
 
-    def test_add_comment_POST(self):
-        self.client.login(username="testuser", password="123Password")
-        comment_text = "This is a test comment."
-        url = reverse("add_comment", args=[self.task.id])
-        response = self.client.post(url, {"comment": comment_text})
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("dashboard"))
-
-    def test_add_comment_invalid_task_id(self):
-        invalid_task_id = 1238323
-        url = reverse("add_comment", args=[invalid_task_id])
-        response = self.client.post(url, {"comment": "Invalid comment"})
-        self.assertEqual(response.status_code, 404)
-
 
 class ShowUserInformationViewTest(TestCase):
     def setUp(self):

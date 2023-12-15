@@ -54,6 +54,11 @@ urlpatterns = [
         views.invite_user,
         name="invite_user",
     ),
+    path(
+        "team/<int:team_id>/remove-user/<int:user_id>/",
+        views.remove_user_from_team,
+        name="remove_user_from_team",
+    ),
     path("team_management/", team_search, name="team_management"),
     path("team/<int:team_id>", views.show_team, name="show_team"),
     path("delete_task/<int:task_id>/", views.delete_task, name="delete_task"),

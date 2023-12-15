@@ -41,7 +41,10 @@
     "fields": {
       "team_name": "Newt",
       "description": "This is a sample team.",
-      "unique_identifier": "#Newt"
+      "unique_identifier": "#Newt",
+      "creation_date": "2024-01-01",
+      "last_modified": "2024-01-01",
+      "team_owner": 2
     }
   },
   {
@@ -50,7 +53,10 @@
     "fields": {
       "team_name": "Team_Newt",
       "description": "This is a sample team.",
-      "unique_identifier": "#Team_Newt"
+      "unique_identifier": "#Team_Newt",
+      "creation_date": "2024-01-01",
+      "last_modified": "2024-01-01",
+      "team_owner": 2
     }
   }
 ]

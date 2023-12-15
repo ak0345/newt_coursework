@@ -57,3 +57,49 @@ class TeamCreationViewTestCase(TestCase):
         team = Team.objects.get(team_name="Team_2")
         self.assertEqual(team.unique_identifier, "#Unique2")
         self.assertEqual(team.description, "B")
+
+class RemoveUserFromTeamTestCase(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            username="owner", email="owner@example.com", password="Password123"
+        )
+        self.user_being_removed = User.objects.create_user(
+            username="user_being_removed",
+            email="user@example.com",
+            password="user_password",
+        )
+        self.team = Team.objects.create(team_owner=self.owner, team_name="Test Team")
+        self.team.users_in_team.add(self.user_being_removed)
+
+    def test_remove_user_from_team(self):
+        self.client.force_login(self.owner)
+        self.client.login(username="owner", password="Password123")
+        url = reverse(
+            "remove_user_from_team", args=(self.team.id, self.user_being_removed.id)
+        )
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        redirected_url = response.url
+        redirected_response = self.client.get(redirected_url)
+        self.assertEqual(redirected_response.status_code, 200)
+        self.assertFalse(self.user_being_removed in self.team.users_in_team.all())
+        self.assertContains(
+            redirected_response,
+            f"{self.user_being_removed.username} has been removed from the team.",
+        )
+
+    def test_remove_user_from_team_as_non_owner(self):
+        non_owner = User.objects.create_user(username="non_owner")
+        self.client.force_login(non_owner)
+        url = reverse(
+            "remove_user_from_team", args=(self.team.id, self.user_being_removed.id)
+        )
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        redirected_url = response.url
+        redirected_response = self.client.get(redirected_url)
+        self.assertEqual(redirected_response.status_code, 200)
+        self.assertTrue(self.user_being_removed in self.team.users_in_team.all())
+        self.assertContains(
+            redirected_response, "Only the team owner can remove members from the team."
+        )

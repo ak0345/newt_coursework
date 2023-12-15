@@ -16,8 +16,6 @@
         <div class="col mt-4">
           <h3>
             <span class="text-muted">Team Name :  </span>{{ team.team_name }}
-
-         
           </h3>
           <cite>{{ team.description }}</cite>
         </div>
@@ -31,14 +29,12 @@
           </div>
           {% endif %}
           {% if user in team.users_in_team.all and user != team.team_owner %}
-
           <div class="row" style="margin-top: -60px;">
             <form method="POST" action="{% url 'leave_team' team_id=team.id %}">
               {% csrf_token %}
               <button type="submit" class="btn btn-outline-danger w-100 mb-2">Leave</button>
             </form>
           </div>
-
           {% endif %}
           {% if user == team.team_owner %}
           <div class="row" style="margin-top: -60px;">
@@ -54,27 +50,26 @@
       <div class="row mt-4">
         <h3>Team members:</h3>
         <ul class="list-group list-group-flush">
-          {% for user in team.users_in_team.all %}
+          {% for team_user in team.users_in_team.all %}
           <li class="list-group-item">
-
-
             <div class="row">
               <div class="col align-self-center">
                 <div class="">
-                  <span class="text-muted">{{ user.username }}</span
-                  >{{" "}}
-                  {% if request.user == user %}
+                  <span class="text-muted">{{ team_user.username }}</span>
+                  {% if request.user == team_user %}
                   <span class="text-muted">(you)</span>
                   {% endif %}
-                  </div>
+                </div>
               </div>
-              {% if request.user != user and request.user.id == team.team_owner.id %}
+              {% if request.user != team_user and request.user == team.team_owner %}
               <div class="col-md-auto">
-                <button class="btn btn-outline-danger w-100">Remove</button>
+                <form method="POST" action="{% url 'remove_user_from_team' team_id=team.id user_id=team_user.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-danger w-100">Remove</button>
+                </form>
               </div>
               {% endif %}
             </div>
-
           </li>
           {% endfor %}
         </ul>
@@ -83,7 +78,6 @@
       {% if user in team.users_in_team.all or user == team.team_owner %}
       <div class="row mt-4">
         <h3>Invite User:</h3>
-
         <div class="row-cols-auto mt-4">
           <div class="col">
             <form method="POST" action="{% url 'invite_user' team.id request.user.id %}">
@@ -98,18 +92,15 @@
                     name="input_username"
                   />
                 </div>
-                
                 <div class="col-sm-auto mr-4">
                   <button type="submit" class="btn btn-outline-dark mb-2">
                     Invite User
                   </button>
                 </div>
-                
               </div>
             </form>
           </div>
         </div>
-
       </div>
       {% endif %}
     </div>
