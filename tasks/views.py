@@ -40,6 +40,7 @@ def lookup_everything(request):
         everythingsearched = request.POST["everythingsearched"]
         teamsfound = Team.objects.filter(unique_identifier__contains=everythingsearched)
         usersfound = User.objects.filter(username__contains=everythingsearched)
+        tasksfound = Task.objects.filter(Q(task_heading__contains=everythingsearched) | Q(task_owner__username__contains=everythingsearched))
         return render(
             request,
             "everything_search.html",
@@ -47,6 +48,7 @@ def lookup_everything(request):
                 "everythingsearched": everythingsearched,
                 "teamsfound": teamsfound,
                 "usersfound": usersfound,
+                "tasksfound": tasksfound,
             },
         )
     else:
@@ -329,7 +331,8 @@ def dashboard(request):
         },
     )
 
-    all_teams = Team.objects.all()
+    all_teams = list(Team.objects.all())
+    all_teams.append("Personal")
 
     tasks = Task.objects.filter(
         Q(task_owner=request.user) | Q(user_assigned=request.user)
@@ -516,9 +519,7 @@ def edit_task(request, task_id):
     return render(request, "edit_task.html", {"form": form, "task": task})
 
 
-def show_task_details(request, task_id):
-    task = Task.objects.get(id=task_id)
-    return render(request, "show_task.html", {"task": task})
+
 
 
 def update_task_status(request, task_id):
@@ -536,6 +537,15 @@ def update_task_status(request, task_id):
                 task_owner.points += 10
                 task_owner.save()
 
+                updated_users = []
+                for assigned_user in task.user_assigned.all():
+                    if task_owner.id != assigned_user.id:
+                        assigned_user.points += 10
+                        assigned_user.save()
+                        updated_users.append(assigned_user)
+                task.user_assigned.set(updated_users)
+                
+
         else:
             if task.status == "Completed":
                 task.status = "In Progress"
@@ -546,6 +556,15 @@ def update_task_status(request, task_id):
                 if task_owner.points >= 10:
                     task_owner.points -= 10
                     task_owner.save()
+
+                updated_users = []
+                for assigned_user in task.user_assigned.all():
+                    if task_owner.id != assigned_user.id:
+                        if assigned_user.points >= 10:
+                            assigned_user.points -= 10
+                            assigned_user.save()
+                            updated_users.append(assigned_user)
+                task.user_assigned.set(updated_users)
 
         task.save()
         return redirect("dashboard")
@@ -589,21 +608,16 @@ def team_delete(request, team_id):
         return redirect("team_management")
     return render(request, "team_management.html", {"team": team})
 
-
 from django.shortcuts import redirect
 from django.http import HttpResponseNotFound
-
-
 def add_comment(request, task_id):
     if request.method == "POST":
-        try:
-            task = Task.objects.get(id=task_id)
-            comment_text = request.POST.get("comment")
-            Comment.objects.create(task=task, text=comment_text)
-            return redirect("dashboard")
-        except:
-            return HttpResponseNotFound("Task not found")
-
+        task = Task.objects.get(id=task_id)
+        comment_text = request.POST.get("comment")
+        Comment.objects.create(task=task, text=comment_text, Commentor=request.user)
+        return redirect(request.META["HTTP_REFERER"])
+    else:
+        pass
 
 def show_user_information(request):
     user = request.user

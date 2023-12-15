@@ -56,7 +56,6 @@ urlpatterns = [
     ),
     path("team_management/", team_search, name="team_management"),
     path("team/<int:team_id>", views.show_team, name="show_team"),
-    path("task/<int:task_id>/", views.show_task_details, name="show_task"),
     path("delete_task/<int:task_id>/", views.delete_task, name="delete_task"),
     path("add_comment/<int:task_id>/", views.add_comment, name="add_comment"),
     path("add_comment/<int:task_id>/", views.add_comment, name="add_comment"),

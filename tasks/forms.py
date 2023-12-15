@@ -8,6 +8,7 @@ from .models import Team
 from .models import Invitation
 from django.forms import ModelForm
 from django.db.models import Q
+from django.contrib.admin import widgets 
 
 
 class TeamSearchForm(forms.Form):
@@ -59,9 +60,6 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         exclude = ["task_owner", "task_complete", "completion_time", "status"]
-
-    if User is None:
-        raise ValueError("A user must be provided to create a task.")
 
     def set_team_assigned_queryset(self, user):
         self.fields["team_assigned"].queryset = Team.objects.filter(

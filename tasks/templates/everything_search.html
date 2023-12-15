@@ -22,6 +22,8 @@
             ><span class="text-muted"
               >created
               by&nbsp;{{team.team_owner|yellow:everythingsearched}}</span
+            ><span class="text-muted"
+              >&nbsp;Team Points:&nbsp;{{team.calculate_team_points}}</span
             ></a
           >
         </li>
@@ -33,6 +35,21 @@
               {{user.last_name|yellow:everythingsearched }}</span
             >&nbsp;<span class="text-muted"
               >{{ user.username|yellow:everythingsearched }}</span
+            ><span class="text-muted"
+              >&nbsp;Points:&nbsp;{{user.points}}</span
+            ></a
+          >
+        </li>
+        {% endfor %}{% for task in tasksfound %}
+        <li class="list-group-item">
+          <a class="text-dark text-decoration-none"
+            ><span>{{ task.task_heading|yellow:everythingsearched }}</span
+            >&nbsp;<span class="text-muted"
+              >{{ task.task_owner.username|yellow:everythingsearched }}</span
+            ><span class="text-muted"
+              >&nbsp;Priority:&nbsp;{{task.priority}}</span
+            ><span class="text-muted"
+              >&nbsp;Status:&nbsp;{{task.status}}</span
             ></a
           >
         </li>

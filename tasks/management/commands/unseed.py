@@ -5,12 +5,15 @@ from django.db.models import Q
 class Command(BaseCommand):
     """Build automation command to unseed the database."""
     
-    help = 'Seeds the database with sample data'
+    help = 'Removes sample data'
 
     def handle(self, *args, **options):
         """Unseed the database."""
 
-        User.objects.all().filter(is_staff=False, is_superuser=False).delete()
+        User.objects.all().filter(Q(is_staff=False, is_superuser=False) | ~Q(username="@charlie")).delete()
+        for user in User.objects.all():
+            user.points = 0
+            user.save()
         Task.objects.all().delete()
         Team.objects.all().filter( ~Q(unique_identifier="#KCL")).delete()
         Comment.objects.all().delete()
