@@ -1,6 +1,7 @@
 """Tests of the task related views."""
 from django.test import TestCase
 from django.contrib.auth.hashers import make_password
+from django.urls import reverse
 from tasks.models import User, Task, Team
 from django.utils import timezone
 
@@ -54,14 +55,19 @@ class TaskViewTest(TestCase):
         form_data = {
             'task_heading': 'Test Task',
             'task_description': 'This is a test task.',
-            'user_assigned': [user1, user2], 
-            'team_assigned': team, 
-            'deadline_date': timezone.now,
-            'task_complete': False,
+            'user_assigned': [user1.id, user2.id], 
+            'team_assigned': team.id, 
+            'deadline_date': timezone.now() + timezone.timedelta(days=3),
             'priority': 'High',
         }
 
 
-        response = self.client.post('/create_task/', data=form_data)
-        self.assertRedirects(response,'/dashboard/')
+        response = self.client.post(reverse('create_task'), data=form_data)
+
+        print(response.content.decode('utf-8'))
+
+        # Assert that the response redirects to the dashboard
+        self.assertRedirects(response, reverse('dashboard'))
+
+        # Assert that a task has been created
         self.assertEqual(Task.objects.count(), 1)

@@ -8,6 +8,7 @@ from .models import Team
 from .models import Invitation
 from django.forms import ModelForm
 from django.db.models import Q
+from django.contrib.admin import widgets 
 
 
 class TeamSearchForm(forms.Form):

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from tasks.forms import TaskForm
+from tasks.forms import TaskForm, EditTaskForm
 from tasks.models import User, Task, Team
 
 
@@ -28,7 +28,9 @@ class TaskFormTest(TestCase):
             "priority": "High",
         }
         form = TaskForm(data=form_data)
+        editform = EditTaskForm(data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
+        self.assertTrue(editform.is_valid(), form.errors)
 
     def test_invalid_task_form(self):
         # Test with invalid data, for example, missing task_heading
@@ -43,4 +45,9 @@ class TaskFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(
             "task_heading", form.errors.keys()
+        )  # Check if 'task_heading' is in the error messages
+        editform = EditTaskForm(data=form_data)
+        self.assertFalse(editform.is_valid())
+        self.assertIn(
+            "task_heading", editform.errors.keys()
         )  # Check if 'task_heading' is in the error messages
