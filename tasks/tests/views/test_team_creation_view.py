@@ -16,7 +16,6 @@ class TeamCreationViewTestCase(TestCase):
             "description": "B",
         }
 
-        # Create a user and log them in
         self.user = User.objects.create_user(
             username="@janedoe", password="123Password"
         )
